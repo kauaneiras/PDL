@@ -1,0 +1,45 @@
+services:
+  # Aplicação Frontend de Prevenção a Lavagem de Dinheiro (PLD/FT)
+  pld-web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: pld_sentinel_web
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    environment:
+      - NODE_ENV=production
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://localhost/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks:
+      - pld-network
+
+  # Banco de Dados Relacional & Grafos (Microsoft SQL Server 2022)
+  # Opcional: pronto para receber as tabelas transacionais, CTEs recursivas e procedures de score
+  pld-database:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: pld_sql_server
+    restart: unless-stopped
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=YourStrong@Password2026!
+      - MSSQL_PID=Developer
+    ports:
+      - "1433:1433"
+    volumes:
+      - sqlserver_data:/var/opt/mssql
+    networks:
+      - pld-network
+
+networks:
+  pld-network:
+    driver: bridge
+
+volumes:
+  sqlserver_data:
+    driver: local

@@ -1,0 +1,6 @@
+{
+  "name": "SentinelAML - Plataforma de Investigação PLD/FT",
+  "description": "Ficha Única de Investigação PLD/FT (AML) para Analistas de Compliance com grafo interativo React Flow, extrato financeiro, triagem de alertas e emissão de parecer COAF.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
