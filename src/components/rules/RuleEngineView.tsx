@@ -337,9 +337,9 @@ export const RuleEngineView: React.FC = () => {
                   setSimPassThrough(false);
                   setSimulatedResult(null);
                 }}
-                className="text-xs text-zinc-500 hover:text-zinc-900 flex items-center gap-1 cursor-pointer"
+                className="px-2.5 py-1 rounded bg-[#FFCC01] hover:bg-[#E5B700] text-black text-xs font-bold border border-[#E5B700] flex items-center gap-1 cursor-pointer transition-colors shadow-xs"
               >
-                <RotateCcw className="w-3 h-3" />
+                <RotateCcw className="w-3 h-3 text-black" />
                 <span>Limpar</span>
               </button>
             </div>
@@ -487,9 +487,9 @@ export const RuleEngineView: React.FC = () => {
 
               <button
                 onClick={handleRunSimulation}
-                className="w-full py-2.5 bg-zinc-900 hover:bg-black text-white rounded font-bold text-xs transition-colors flex items-center justify-center gap-2 cursor-pointer mt-3"
+                className="w-full py-2.5 bg-[#FFCC01] hover:bg-[#E5B700] text-black rounded font-bold text-xs border border-[#E5B700] transition-colors flex items-center justify-center gap-2 cursor-pointer shadow-xs mt-3"
               >
-                <Play className="w-3.5 h-3.5" />
+                <Play className="w-3.5 h-3.5 text-black fill-black" />
                 <span>Executar Motor de Decisão</span>
               </button>
             </div>

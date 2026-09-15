@@ -2,7 +2,9 @@ import type { CSSProperties } from 'react';
 
 export type RiskLevel = 'Crítico' | 'Alto' | 'Médio' | 'Baixo';
 
-export type AlertStatus = 'Pendente' | 'Em Análise' | 'Em análise' | 'Diligência' | 'Comunicado COAF' | 'Arquivado';
+export type UserRole = 'ANALISTA' | 'DIRETORIA';
+
+export type AlertStatus = 'Pendente' | 'Em Análise' | 'Em análise' | 'Diligência' | 'Aguardando Assinatura DIREX' | 'Comunicado COAF' | 'Arquivado';
 
 export type NodeType =
   | 'MAIN'
@@ -38,6 +40,82 @@ export type TransactionType = 'Crédito' | 'Débito';
 
 export type RegiaoRisco = 'Fronteira' | 'Mineração' | 'Padrão';
 
+export interface DeviceIntelligence {
+  deviceId: string;
+  modelo: string;
+  sistemaOperacional: string;
+  ip: string;
+  localizacaoGeo: string;
+  provedorIsp: string;
+  scoreRiscoFraude: number; // 0 a 100
+  nivelRiscoFraude: 'Baixo' | 'Médio' | 'Alto' | 'Crítico';
+  notasAltas: string[];
+  vpnAtiva: boolean;
+  multiplosCpfsAssociados: boolean;
+  emuladorDetectado: boolean;
+  simSwapRecente: boolean;
+  dataUltimoAcesso: string;
+}
+
+export interface VendaImovelCruzamento {
+  id: string;
+  cpfEnvolvido: string;
+  nomeEnvolvido: string;
+  tipoPapel: 'COMPRADOR' | 'VENDEDOR';
+  bairro: string;
+  cidadeUf: string;
+  tipoImovel: 'Apartamento' | 'Casa em Condomínio' | 'Lote / Terreno' | 'Comercial' | 'Cobertura' | 'Fazenda';
+  areaM2: number;
+  valorDeclarado: number;
+  valorMedioM2Bairro: number;
+  valorEstimadoMercado: number;
+  discrepanciaPercentual: number; // ex: -45% subfaturamento ou +90% superfaturamento
+  rendaMensalDeclarada: number;
+  patrimonioDeclarado: number;
+  capacidadeCompativel: boolean;
+  grauIncompatibilidade: 'COMPATÍVEL' | 'MODERADA' | 'GRAVE_INCOMPATIBILIDADE' | 'ALERTA_SUBFATURAMENTO';
+  alertaDescricao: string;
+  dataTransacao: string;
+  cartorioOficio: string;
+  matriculaCartorio: string;
+}
+
+export interface FlowScoreCondition {
+  id: string;
+  nome: string;
+  descricao: string;
+  categoria: 'HORARIO' | 'DISCREPANCIA' | 'JOGOS_APOSTAS' | 'DISPOSITIVO' | 'IMOVEIS' | 'GEOGRAFICO';
+  campoGatilho: string;
+  operador: '>' | '<' | '>=' | '<=' | 'BETWEEN' | 'EQUALS' | 'CONTAINS';
+  valorReferencia: string | number;
+  pontosScore: number;
+  pesoMensal: 'BAIXO' | 'MEDIO' | 'ALTO' | 'CRITICO';
+  procedimentoSqlSnippet: string;
+  ativo: boolean;
+}
+
+export interface MonitoramentoCustomizado {
+  id: string;
+  nome: string;
+  tipo: 'FAIXA_HORARIO' | 'DISCREPANCIA_RENDA' | 'HORARIO_JOGOS' | 'DISPOSITIVO_ALTO_RISCO' | 'TRANSACOES_REPETIDAS';
+  descricao: string;
+  parametros: {
+    horarioInicio?: string;
+    horarioFim?: string;
+    diasSemana?: string[];
+    multiplicadorRenda?: number;
+    volumeMinimo?: number;
+    scoreFraudeMinimo?: number;
+    apenasEmHorarioDeJogos?: boolean;
+    bairroImovel?: string;
+  };
+  acaoAlerta: 'GERAR_ALERTA_CRITICO' | 'PONTUAR_SCORE_MENSAL' | 'DILIGENCIA_AUTOMATICA';
+  status: 'ATIVO' | 'PAUSADO';
+  totalDisparosMes: number;
+  criadoPor: string;
+  dataCriacao: string;
+}
+
 export interface Transaction {
   id: string;
   data: string;
@@ -59,6 +137,8 @@ export interface Transaction {
   metodo?: 'PIX' | 'TED' | 'Boleto' | 'Amortização' | 'Espécie' | 'Cripto' | 'Cartão' | 'Débito em Conta';
   cpfDepositanteIdentificado?: boolean;
   cpfDepositante?: string;
+  isHorarioJogos?: boolean;
+  faixaHorario?: 'Madrugada' | 'Manhã' | 'Tarde' | 'Noite';
 }
 
 export interface GraphNodeData {
@@ -166,6 +246,10 @@ export interface KycProfile {
   }[];
   chavesPix: string[];
   midiasDesabonadoras?: string[];
+  estadoCivil?: 'Solteiro(a)' | 'Casado(a)' | 'Divorciado(a)' | 'Viúvo(a)' | 'União Estável';
+  tempoAssociadoMeses?: number;
+  origemRecursosPrincipal?: string;
+  deviceInfo?: DeviceIntelligence;
   qsaVinculos?: {
     cnpj: string;
     razaoSocial: string;
@@ -248,6 +332,11 @@ export interface ParecerGestorGeconGesin {
 export interface DeliberacaoDirex {
   decisaoDiretoria: 'DISPENSADA' | 'HOMOLOGADA_COMUNICACAO_COAF' | 'RETENCAO_CAUTELAR';
   textoDeliberacao: string; // "Dispensada - sem ocorrência de registro/comunicação ao COAF conforme critérios de materialidade..."
+  aprovadoPor?: string;
+  cargoAprovador?: string;
+  dataHoraAssinatura?: string;
+  certificadoIcpBrasilToken?: string;
+  hashAssinaturaDigital?: string;
   dadosControleSiscoaf: {
     numeroOrigem: string;
     documentoControle: string;
@@ -258,11 +347,157 @@ export interface DeliberacaoDirex {
   };
 }
 
+export type TipoFicha = 'Operações' | 'Conta Corrente';
+
+export type CategoriaPublicoDossie =
+  | 'PEP'
+  | 'REGIAO_MINERACAO_FRONTEIRA'
+  | 'RECURSOS_TERCEIROS_PROCURACAO'
+  | 'MENOR'
+  | 'FUNCIONARIO_COOPERFORTE'
+  | 'LIMOC'
+  | 'DEMAIS_RECURSO_PROPRIO';
+
+export interface ItemValidacaoDossie {
+  id: string;
+  codigo: string;
+  titulo: string;
+  descricaoExigencia: string;
+  obrigatorio: boolean;
+  status: 'CONFORME' | 'PENDENTE' | 'NAO_CONFORME' | 'NAO_APLICAVEL';
+  origemValidacao?: 'AUTOMATICA' | 'MANUAL'; // RF-42
+  baseLegal?: string; // RF-41
+  evidenciaDoc?: string; // RF-42
+  anexoEvidencia?: string; // RF-42
+  dataValidacao?: string;
+  validador?: string;
+  observacoes?: string;
+}
+
+export interface ValidacaoCategoriaDossie {
+  categoria: CategoriaPublicoDossie;
+  tituloCategoria: string;
+  focoExigencia: string;
+  baseRegulatoria: string;
+  statusGeral: 'APROVADO' | 'PENDENTE_DOCUMENTACAO' | 'REPROVADO_IMPEDITIVO';
+  itens: ItemValidacaoDossie[];
+}
+
 export interface SmartSnippet {
   id: string;
   titulo: string;
   categoria: string;
   texto: string;
+}
+
+export interface ContratoCreditoSnapshot {
+  numeroContrato: string;
+  modalidade: string;
+  saldoDevedor: number;
+  dataContratacao: string;
+  valorContratado?: number;
+  parcelasRestantes?: number;
+  situacao?: string;
+}
+
+export interface ParecerVersao {
+  id: string;
+  versao: number;
+  vigente: boolean;
+  textoAutomaticoSugerido: string;
+  textoFinal: string;
+  percentualEdicaoHumana: number;
+  analistaNome: string;
+  dataCriacao: string;
+  tipoSalvamento: 'RASCUNHO' | 'DEFINITIVO';
+}
+
+export interface DecisaoGecan {
+  decisao: 'SEM_OCORRENCIA' | 'COMUNICAR_COAF' | 'DILIGENCIA_EXTERNA' | null;
+  recomendacaoGecan?: string;
+  tipologiaCoafCodigo?: string; // RF-44
+  tipologiaCoafDescricao?: string;
+  dataDecisao?: string;
+  dtDecisao?: string;
+  dataComunicacaoCoaf?: string;
+  numeroProtocoloSiscoaf?: string;
+  prazoLimiteComunicacao?: string; // 24h SLA regulatório (RN-11)
+  tempestiva?: boolean;
+  sigiloAtivo?: boolean; // RN-07
+  membroGecanResponsavel?: string;
+  decididoPor?: string;
+}
+
+export interface StatusHistoricoItem {
+  id: string;
+  deStatus: string;
+  paraStatus: string;
+  dataHora: string;
+  usuario: string;
+  justificativa?: string;
+  detalhes?: string;
+}
+
+export interface ExportacaoLogItem {
+  id: string;
+  fichaId?: string;
+  nomeCaso?: string;
+  cpf?: string;
+  formato: 'PDF' | 'CSV' | 'XML';
+  dataHora: string;
+  usuario: string;
+  finalidade: string;
+}
+
+export interface RemessaMensal {
+  id: string;
+  dataReferencia: string; // ex: '08/2026'
+  tipoFicha: TipoFicha;
+  dtGeracao: string;
+  totalFichas: number;
+  fichasNovas: number;
+  fichasJaExistentes: number;
+  fichasConcluidas: number;
+  fichasPendentes: number;
+  status: 'Aberta' | 'Em Andamento' | 'Concluída';
+  geradaPor: string;
+}
+
+export interface FichaAnteriorItem {
+  id: string;
+  dataReferencia: string;
+  tipoFicha: TipoFicha;
+  status: string;
+  decisao: 'SEM_OCORRENCIA' | 'COMUNICAR_COAF';
+  analista: string;
+  valorEnvolvido: number;
+  motivo: string;
+  dataConclusao: string;
+}
+
+export interface SnapshotCadastralInfo {
+  rendaDeclarada: number;
+  patrimonioDeclarado: number;
+  profissao: string;
+  empresaVinculo?: string;
+  segmentoPerfilSigla: string;
+  segmentoDescricao: string;
+  enderecoCompleto: string;
+  cidadeUf: string;
+  fatorGeografico?: string;
+  limocAtivo: boolean;
+  limocValorTeto?: number;
+  contratosCreditoAtivos: {
+    numeroContrato: string;
+    modalidade: string;
+    saldoDevedor: number;
+    dataContratacao: string;
+  }[];
+  produtosInvestimentoAtivos: {
+    modalidade: string;
+    saldoAplicado: number;
+  }[];
+  dtSnapshot: string;
 }
 
 export interface AuditLog {
@@ -401,6 +636,33 @@ export interface CasoInvestigacao {
   isCsnuListed?: boolean; // Lei 13.810/2019
   isCoeObrigatorio?: boolean; // Espécie >= 50k
   isAmortizacaoAntecipada?: boolean; // Liquidação DCO
+
+  // Category Specific Dossier Requirements & Validation
+  categoriaDossie?: CategoriaPublicoDossie;
+  validacaoDossie?: ValidacaoCategoriaDossie;
+
+  // v2 Fields (Banco de Dados como Registro)
+  tipoFicha?: TipoFicha;
+  dataReferencia?: string; // ex: '08/2026'
+  snapshotCadastral?: SnapshotCadastralInfo;
+  versoesParecer?: ParecerVersao[];
+  decisaoGecanDetalhada?: DecisaoGecan;
+  statusHistorico?: StatusHistoricoItem[];
+  fichasAnteriores?: FichaAnteriorItem[];
+  reincidenciaPld?: {
+    totalAnalisesAnteriores: number;
+    mesesAnteriores: string[];
+    ultimaDataAnalise?: string;
+    statusAnteriores?: string[];
+  };
+  demandaAtualizacaoGecan?: boolean;
+
+  // Dados Analíticos, Dispositivo e BI
+  device?: DeviceIntelligence;
+  origemRecursos?: string;
+  estadoCivil?: string;
+  tempoAssociadoMeses?: number;
+  regiaoPais?: string;
 
   kyc: KycProfile;
   transacoes: Transaction[];

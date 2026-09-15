@@ -123,3 +123,20 @@ Monitora a transição de contas normais ou dormentes para a fase de esvaziament
 1. **Explicabilidade da Decisão**: O sistema não atua como caixa-preta. Toda atribuição de pontuação detalha exatamente o código da regra, a base legal e a evidência fática apurada.
 2. **Trilha de Auditoria Imutável**: Registro do carimbo temporal, identificação do analista responsável, versão do motor de regras e hash digital SHA-256 da deliberação.
 3. **Guarda Documental**: Manutenção dos registros de investigação e dossiês por no mínimo **5 anos** (conforme Circular BACEN nº 3.978/2020).
+
+---
+
+## 5. Exigências Específicas do Dossiê por Público-Alvo e Categoria
+
+Para assegurar conformidade integral com a **Circular BACEN nº 3.978/2020** e diretrizes setoriais de auditoria, o sistema parametriza matrizes documentais dinâmicas por categoria de cliente:
+
+| Categoria | Foco e Exigências Específicas do Dossiê | Base Regulatória | Itens de Validação Obrigatórios |
+| :--- | :--- | :--- | :--- |
+| **PEP (Pessoa Exposta Politicamente)** | Comprovação exaustiva da origem da riqueza (Declaração de IR, holerites do cargo público), pesquisa profunda em mídia negativa (corrupção) e aprovação obrigatória da Alta Administração para abertura ou manutenção da conta. | Circular 3.978 (Arts. 25-29) e Resolução COAF 40/2021 | • Origem da riqueza (IRPF/Holerite)<br>• Mídia negativa e tribunais<br>• Aprovação Alta Administração/Comitê<br>• Vínculos até 2º grau |
+| **Região Mineração / Fronteira** | Validação rigorosa de endereço físico, checagem de atividade econômica real, pesquisa sobre licenças ambientais/fiscais (para combater garimpo ilegal) e análise de uso intensivo de dinheiro em espécie. | Avaliação de Risco Geográfico (BACEN/COAF/PF) | • Validação de endereço e vistoria física<br>• Atividade econômica real e alvará<br>• Licenças ambientais (IBAMA/ANM)<br>• Justificativa de espécie na praça |
+| **Rec. Terceiros / Instrumento Legal** | Cópia validada de procurações ou contratos, identificação e qualificação completa do Beneficiário Final (quem é o verdadeiro dono do dinheiro) e justificativa comercial lógica para a representação. | IN RFB nº 2.119/2022 e Carta-Circular 4.001 | • Cópia de procuração pública / contrato<br>• Qualificação do Beneficiário Final (UBO)<br>• Justificativa comercial da representação |
+| **Menor de Idade** | Identificação dos tutores legais e comprovação de que a movimentação na conta da criança/adolescente é suportada e compatível com o patrimônio dos pais ou responsáveis. | Código Civil e Circular 3.978 (Art. 13) | • Identificação oficial de pais/tutores<br>• Comprovação patrimonial dos pais<br>• Finalidade compatível (poupança/estudo) |
+| **Funcionário Cooperforte** | Declarações de conflito de interesse e análises cruzando o salário pago pela própria cooperativa com a movimentação bancária externa (buscando discrepâncias que indiquem fraude interna ou propina). | Código de Ética e Circular 3.978 (Pessoas Internas) | • Termo de inexistência de conflito de interesses<br>• Cruzamento folha salarial x movimentação<br>• Relação financeira com fornecedores |
+| **LIMOC (Monitoramento Condicionado)** | Dossiê focado no histórico: registros de alertas anteriores, atas de comitê que aprovaram o monitoramento condicionado/limites reduzidos e os relatórios de revisão periódica desse cliente. | Política Institucional PLD/FT e Gestão de Risco | • Histórico de alertas anteriores (24 meses)<br>• Ata de comitê fixando LIMOC<br>• Relatório periódico de revisão |
+| **Demais / Recurso Próprio** | Documentação padrão (Know Your Customer básico): documento de identidade, comprovante de residência, autodeclaração de renda e checagem simples em listas restritivas. | Circular BACEN 3.978 (Arts. 10 a 14) | • Documento de identificação oficial com foto<br>• Comprovante de endereço (< 90 dias)<br>• Autodeclaração de renda/patrimônio<br>• Checagem em listas restritivas/sanções |
+

@@ -6,6 +6,11 @@ import { RuleEngineView } from './components/rules/RuleEngineView';
 import { LotesCoeView } from './components/coe/LotesCoeView';
 import { DashboardView } from './components/dashboard/DashboardView';
 import { InvestigationView } from './components/investigation/InvestigationView';
+import { HistoricalAuditView } from './components/audit/HistoricalAuditView';
+import { BiAnalyticsView } from './components/analytics/BiAnalyticsView';
+import { FlowManagerView } from './components/flow/FlowManagerView';
+import { RealEstateCrossView } from './components/analytics/RealEstateCrossView';
+import { DirexApprovalView } from './components/direx/DirexApprovalView';
 import { CheckCircle2, AlertTriangle, Info, XCircle } from 'lucide-react';
 
 const AppContent: React.FC = () => {
@@ -14,6 +19,21 @@ const AppContent: React.FC = () => {
   const renderCurrentView = () => {
     if (currentRoute.startsWith('/investigacao')) {
       return <InvestigationView />;
+    }
+    if (currentRoute.startsWith('/direx')) {
+      return <DirexApprovalView />;
+    }
+    if (currentRoute.startsWith('/auditoria')) {
+      return <HistoricalAuditView />;
+    }
+    if (currentRoute.startsWith('/bi') || currentRoute.startsWith('/analytics')) {
+      return <BiAnalyticsView />;
+    }
+    if (currentRoute.startsWith('/flow-manager')) {
+      return <FlowManagerView />;
+    }
+    if (currentRoute.startsWith('/imoveis') || currentRoute.startsWith('/cruzamento-imoveis')) {
+      return <RealEstateCrossView />;
     }
     if (currentRoute.startsWith('/regras')) {
       return <RuleEngineView />;
@@ -54,7 +74,7 @@ const AppContent: React.FC = () => {
             {toastMessage.type === 'success' && <CheckCircle2 className="w-5 h-5 text-emerald-600 shrink-0" />}
             {toastMessage.type === 'warning' && <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0" />}
             {toastMessage.type === 'error' && <XCircle className="w-5 h-5 text-red-600 shrink-0" />}
-            {toastMessage.type === 'info' && <Info className="w-5 h-5 text-sky-600 shrink-0" />}
+            {toastMessage.type === 'info' && <Info className="w-5 h-5 text-zinc-800 shrink-0" />}
             <span>{toastMessage.text}</span>
           </div>
         </div>

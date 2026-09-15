@@ -354,6 +354,59 @@ export const DossierExportModal: React.FC<DossierExportModalProps> = ({ caso, is
                 </div>
               </div>
 
+              {/* Exigências Específicas do Público-Alvo do Dossiê */}
+              {dossier.parte4.validacaoPublicoAlvo && (
+                <div className="space-y-1.5 pt-2 border-t border-zinc-200">
+                  <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-1">
+                    <span className="text-[10px] text-zinc-700 font-bold uppercase block">
+                      Exigências Específicas do Dossiê — {dossier.parte4.validacaoPublicoAlvo.tituloCategoria}
+                    </span>
+                    <span className={`font-mono text-[9px] font-bold px-1.5 py-0.5 rounded border ${
+                      dossier.parte4.validacaoPublicoAlvo.statusGeral === 'APROVADO'
+                        ? 'border-zinc-400 bg-zinc-100 text-zinc-900'
+                        : 'border-zinc-400 bg-zinc-200 text-zinc-900 font-black'
+                    }`}>
+                      [STATUS GERAL: {dossier.parte4.validacaoPublicoAlvo.statusGeral}]
+                    </span>
+                  </div>
+
+                  <p className="text-[10px] text-zinc-600 leading-tight">
+                    <strong>Foco:</strong> {dossier.parte4.validacaoPublicoAlvo.focoExigencia}
+                  </p>
+
+                  <div className="space-y-1">
+                    {dossier.parte4.validacaoPublicoAlvo.itens.map((it, idx) => (
+                      <div
+                        key={idx}
+                        className="p-1.5 bg-white border border-zinc-200 rounded flex flex-col sm:flex-row sm:items-center justify-between text-[10px] gap-1"
+                      >
+                        <div className="space-y-0.5 flex-1 pr-2">
+                          <div className="font-bold text-zinc-900">
+                            <span className="font-mono text-zinc-600 mr-1.5">[{it.codigo}]</span>
+                            {it.titulo}
+                          </div>
+                          <div className="text-[9.5px] text-zinc-600">{it.descricao}</div>
+                          {it.evidencia && (
+                            <div className="text-[9px] text-zinc-500 font-mono">
+                              Evidência: {it.evidencia}
+                            </div>
+                          )}
+                        </div>
+                        <span className={`font-mono text-[9px] font-bold px-1.5 py-0.5 rounded border shrink-0 text-center ${
+                          it.status === 'CONFORME'
+                            ? 'border-zinc-300 bg-zinc-50 text-zinc-800'
+                            : it.status === 'NAO_CONFORME'
+                            ? 'border-zinc-500 bg-zinc-300 text-zinc-950 font-black'
+                            : 'border-zinc-300 bg-zinc-100 text-zinc-700'
+                        }`}>
+                          [{it.status}]
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
               {/* Despachos */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 pt-2 border-t border-zinc-300">
                 <div className="p-2 bg-white border border-zinc-200 rounded space-y-1">
@@ -520,9 +573,9 @@ export const DossierExportModal: React.FC<DossierExportModalProps> = ({ caso, is
               </div>
               <button
                 onClick={handleCopyHash}
-                className="px-2 py-0.5 rounded bg-zinc-200 hover:bg-zinc-300 text-zinc-800 text-[9.5px] font-sans font-bold flex items-center gap-1 shrink-0 print:hidden transition-colors"
+                className="px-2 py-0.5 rounded bg-[#FFCC01] hover:bg-[#E5B700] text-black text-[9.5px] font-sans font-bold border border-[#E5B700] flex items-center gap-1 shrink-0 print:hidden transition-colors shadow-xs"
               >
-                {copiedHash ? <Check className="w-3 h-3 text-zinc-900" /> : <Copy className="w-3 h-3" />}
+                {copiedHash ? <Check className="w-3 h-3 text-black" /> : <Copy className="w-3 h-3 text-black" />}
                 <span>{copiedHash ? 'Copiado' : 'Copiar Hash'}</span>
               </button>
             </div>
@@ -538,14 +591,14 @@ export const DossierExportModal: React.FC<DossierExportModalProps> = ({ caso, is
           <div className="flex items-center gap-2">
             <button
               onClick={handlePrint}
-              className="px-3.5 py-1.5 rounded bg-[#FFCC01] hover:bg-[#E5B700] text-zinc-950 font-bold flex items-center gap-1.5 transition-colors"
+              className="px-3.5 py-1.5 rounded bg-[#FFCC01] hover:bg-[#E5B700] text-black font-bold border border-[#E5B700] flex items-center gap-1.5 transition-colors shadow-xs"
             >
-              <Printer className="w-3.5 h-3.5" />
+              <Printer className="w-3.5 h-3.5 text-black" />
               <span>Imprimir / Gerar PDF</span>
             </button>
             <button
               onClick={onClose}
-              className="px-3.5 py-1.5 rounded bg-zinc-200 hover:bg-zinc-300 text-zinc-800 font-medium transition-colors"
+              className="px-3.5 py-1.5 rounded bg-[#FFCC01] hover:bg-[#E5B700] text-black font-bold border border-[#E5B700] transition-colors shadow-xs"
             >
               Fechar
             </button>

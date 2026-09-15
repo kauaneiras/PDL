@@ -1,11 +1,19 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useAml } from '../../context/AmlContext';
 import { GraphView } from './GraphView';
 import { DossierExportModal } from './DossierExportModal';
+import { DossierRequirementsSection } from './DossierRequirementsSection';
 import { mockSnippets, coafTipologias } from '../../data/mock-data';
 import { generateCanonicalPldGraph } from '../../utils/graphPldGenerator';
-import { CasoInvestigacao } from '../../types';
+import { CasoInvestigacao, ValidacaoCategoriaDossie } from '../../types';
 import confetti from 'canvas-confetti';
+import { ContratosCreditoTab } from './ContratosCreditoTab';
+import { ParecerVersionamentoSection } from './ParecerVersionamentoSection';
+import { DecisaoGecanModal } from './DecisaoGecanModal';
+import { ReaberturaModal } from './ReaberturaModal';
+import { exportarFichaParaXml, gerarParecerSugeridoAutomatico } from '../../utils/pldV2Helper';
+import { HelpTooltip } from '../common/HelpTooltip';
+import { PersonAnalysisActionGuide } from './PersonAnalysisActionGuide';
 import {
   ArrowLeft,
   HelpCircle,
@@ -32,21 +40,48 @@ import {
   Users,
   Search,
   FileDown,
-  Printer
+  Printer,
+  Code,
+  RotateCcw,
+  Landmark,
+  FileCheck
 } from 'lucide-react';
 
 export const InvestigationView: React.FC = () => {
-  const { activeCase, saveDraft, finalizeDeliberation, showToast, navigateTo } = useAml();
+  const {
+    activeCase,
+    updateDossierValidation,
+    updateParecer,
+    salvarVersaoParecer,
+    saveDraft,
+    finalizeDeliberation,
+    registrarExportacao,
+    showToast,
+    navigateTo,
+    currentUserRole,
+    setCurrentUserRole,
+    assinarDirex,
+    rejeitarDirex,
+  } = useAml();
 
-  // Accordions states (Capacidade Financeira & Grafo open by default)
+  const isCaseClosed = activeCase.status === 'Comunicado COAF' || activeCase.status === 'Arquivado' || activeCase.status === 'Aguardando Assinatura DIREX';
+
+  // Accordions states
   const [openSections, setOpenSections] = useState<{ [key: string]: boolean }>({
     kyc: false,
     alerta: false,
     bancarios: false,
+    contratos: false,
+    dossieReqs: true,
     capacidade: true,
     grafo: true,
     extrato: false,
   });
+
+  const [showDecisaoGecanModal, setShowDecisaoGecanModal] = useState(false);
+  const [showReaberturaModal, setShowReaberturaModal] = useState(false);
+  const [showUnsavedExitModal, setShowUnsavedExitModal] = useState(false);
+  const [isExportDropdownOpen, setIsExportDropdownOpen] = useState(false);
 
   const toggleSection = (section: string) => {
     setOpenSections((prev) => ({ ...prev, [section]: !prev[section] }));
@@ -66,6 +101,10 @@ export const InvestigationView: React.FC = () => {
   });
 
   const toggleCheck = (key: keyof typeof checklist) => {
+    if (isCaseClosed) {
+      showToast('Ficha encerrada (RN-03): Checklist em modo somente leitura.', 'warning');
+      return;
+    }
     setChecklist((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
@@ -78,6 +117,61 @@ export const InvestigationView: React.FC = () => {
       ? 'Identificada movimentação atípica sem lastro econômico e rápida evasão de recursos. Operação formalmente comunicada ao SISCOAF nos termos da Lei 9.613/98.'
       : 'Iniciada análise de atipicidade. Verificada incompatibilidade entre a movimentação financeira registrada no período e a renda declarada no cadastro. Procedendo com a checagem de contrapartes e extrato.')
   );
+
+  const [initialSavedText, setInitialSavedText] = useState(activeCase.parecer?.texto || '');
+  const [initialSavedChecklist, setInitialSavedChecklist] = useState(checklist);
+
+  useEffect(() => {
+    const txt = activeCase.parecer?.texto || '';
+    setInitialSavedText(txt);
+    setAnotacoes(
+      txt ||
+      (activeCase.status === 'Arquivado'
+        ? 'Operação analisada pela equipe de PLD/FT. Constatada mesma titularidade e regularidade fiscal/patrimonial, sem indícios de ocultação de valores ou burla regulatória. Parecer pelo arquivamento.'
+        : activeCase.status === 'Comunicado COAF'
+        ? 'Identificada movimentação atípica sem lastro econômico e rápida evasão de recursos. Operação formalmente comunicada ao SISCOAF nos termos da Lei 9.613/98.'
+        : gerarParecerSugeridoAutomatico(activeCase))
+    );
+    const initialChk = {
+      qualificacaoKyc: activeCase.resumoPldChecklist?.qualificacaoKyc ?? true,
+      capacidadeFinanceira: activeCase.resumoPldChecklist?.capacidadeFinanceira ?? false,
+      listasRestritivas: activeCase.resumoPldChecklist?.listasRestritivas ?? true,
+      enquadramentoPep: activeCase.resumoPldChecklist?.enquadramentoPep ?? true,
+      vinculosSocietarios: activeCase.resumoPldChecklist?.vinculosSocietarios ?? true,
+      origemDestinoRecursos: activeCase.resumoPldChecklist?.origemDestinoRecursos ?? false,
+      midiasDesabonadoras: activeCase.resumoPldChecklist?.midiasDesabonadoras ?? true,
+      analiseFracionamento: activeCase.resumoPldChecklist?.analiseFracionamento ?? true,
+      contasPassagem: activeCase.resumoPldChecklist?.contasPassagem ?? true,
+    };
+    setChecklist(initialChk);
+    setInitialSavedChecklist(initialChk);
+  }, [activeCase.id]);
+
+  const hasUnsavedChanges = useMemo(() => {
+    if (isCaseClosed) return false;
+    const textChanged = anotacoes.trim() !== (initialSavedText || '').trim();
+    const checklistChanged = JSON.stringify(checklist) !== JSON.stringify(initialSavedChecklist);
+    return textChanged || checklistChanged;
+  }, [anotacoes, initialSavedText, checklist, initialSavedChecklist, isCaseClosed]);
+
+  useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasUnsavedChanges) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [hasUnsavedChanges]);
+
+  const handleBackClick = () => {
+    if (hasUnsavedChanges) {
+      setShowUnsavedExitModal(true);
+    } else {
+      navigateTo('/');
+    }
+  };
 
   const [deliberacao, setDeliberacao] = useState<'ARQUIVAR' | 'DILIGENCIA' | 'COMUNICAR_COAF' | 'BLOQUEIO_CAUTELAR'>(
     activeCase.parecer.deliberacao === 'COMUNICAR_COAF'
@@ -184,7 +278,22 @@ export const InvestigationView: React.FC = () => {
   };
 
   const handleSave = () => {
-    saveDraft(activeCase.id);
+    if (isCaseClosed) return;
+    if (!anotacoes.trim()) {
+      showToast('O parecer técnico não pode estar em branco.', 'warning');
+      return;
+    }
+    const minutaSugerida = gerarParecerSugeridoAutomatico(activeCase);
+    salvarVersaoParecer(activeCase.id, minutaSugerida, anotacoes.trim(), 'DEFINITIVO');
+    updateParecer(activeCase.id, {
+      texto: anotacoes.trim(),
+      deliberacao,
+      tipologiaCoaf,
+      salvoEm: new Date().toLocaleTimeString('pt-BR'),
+    });
+    setInitialSavedText(anotacoes.trim());
+    setInitialSavedChecklist(checklist);
+    showToast('Ficha técnica e parecer salvos com sucesso!', 'success');
   };
 
   const handleFinalize = () => {
@@ -233,47 +342,221 @@ export const InvestigationView: React.FC = () => {
     desvioPadraoMovimentacao: '+1.860% acima da média histórica',
   };
 
+  const handleExportXml = () => {
+    const xml = exportarFichaParaXml(activeCase);
+    const blob = new Blob([xml], { type: 'application/xml;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.setAttribute('href', url);
+    link.setAttribute('download', `DOSSIE_PLDFT_${activeCase.id}_${activeCase.cpf.replace(/\D/g, '')}.xml`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    registrarExportacao(activeCase.id, activeCase.nome, activeCase.cpf, 'XML', 'Exportação Estruturada de Dossiê para Fiscalização BACEN (RF-32)');
+    showToast(`Dossiê estruturado XML de ${activeCase.nome} exportado com sucesso!`, 'success');
+  };
+
   return (
     <div className="min-h-screen bg-[#F4F4F5] text-[#222222] font-sans pb-20">
       {/* Top Banner Navigation */}
       <div className="bg-[#E5E7EB] border-b border-[#D1D5DB] px-4 sm:px-6 py-2.5 flex items-center justify-between shadow-xs">
         {/* Yellow Back Button */}
         <button
-          onClick={() => navigateTo('/')}
-          className="px-5 py-1.5 bg-[#FFCC01] hover:bg-[#E5B700] text-[#111827] text-xs font-black rounded-md flex items-center gap-1.5 shadow-xs border border-[#E5B700] transition-colors"
+          onClick={handleBackClick}
+          className="px-5 py-1.5 bg-[#FFCC01] hover:bg-[#E5B700] text-[#111827] text-xs font-black rounded-md flex items-center gap-1.5 shadow-xs border border-[#E5B700] transition-colors cursor-pointer"
         >
           <ArrowLeft className="w-3.5 h-3.5" />
           <span>Voltar</span>
         </button>
 
         {/* Centered Title */}
-        <div className="text-center flex-1">
+        <div className="text-center flex-1 flex items-center justify-center gap-2">
           <h1 className="text-sm sm:text-base font-black text-[#111827] tracking-tight">
             Parecer Técnico PLD/FT - Análise de Atipicidade Financeira
           </h1>
+          <HelpTooltip
+            title="Investigação PLD/FT & Parecer Técnico"
+            content="Instrução analítica completa com validação documental por público-alvo, versionamento imutável de pareceres e deliberação colegiada da GECAN."
+            baseRegulatoria="Circular BACEN nº 3.978/2020 Art. 25 a 29 e Resolução COAF nº 40/2021"
+          />
         </div>
 
-        {/* Quick Tools & PDF Export */}
-        <div className="flex items-center gap-2">
+        {/* Quick Tools & Unified Export Dropdown */}
+        <div className="flex items-center gap-2 relative">
           <button
             onClick={() => setShowAuditModal(true)}
-            className="px-3 py-1.5 bg-[#FFFFFF] hover:bg-[#F3F4F6] text-[#374151] text-xs font-bold rounded-md border border-[#D1D5DB] shadow-xs flex items-center gap-1"
+            className="px-3 py-1.5 bg-[#FFCC01] hover:bg-[#E5B700] text-black text-xs font-bold rounded-md border border-[#E5B700] shadow-xs flex items-center gap-1.5 transition-colors cursor-pointer"
           >
-            <History className="w-3.5 h-3.5 text-zinc-500" />
+            <History className="w-3.5 h-3.5 text-black" />
             <span className="hidden sm:inline">Trilha de Auditoria</span>
           </button>
 
-          {/* Destaque: Botão Principal de Exportação para PDF */}
-          <button
-            onClick={() => setShowDossierModal(true)}
-            className="px-4 py-1.5 bg-[#FFCC01] hover:bg-[#E5B700] text-[#111827] text-xs font-black rounded-md border border-[#E5B700] shadow-xs flex items-center gap-1.5 transition-all hover:scale-[1.02] active:scale-95"
-            title="Exportar Ficha Oficial COAF em PDF conforme Lei 9.613/98"
-          >
-            <FileDown className="w-4 h-4 stroke-[2.5]" />
-            <span>Exportar como PDF</span>
-          </button>
+          {/* Unified Export Menu */}
+          <div className="relative">
+            <button
+              onClick={() => setIsExportDropdownOpen(!isExportDropdownOpen)}
+              className="px-4 py-1.5 bg-[#FFCC01] hover:bg-[#E5B700] text-black text-xs font-black rounded-md border border-[#E5B700] shadow-xs flex items-center gap-1.5 transition-colors cursor-pointer"
+              title="Exportar dossiê em formatos oficiais"
+            >
+              <FileDown className="w-4 h-4" />
+              <span>Exportar</span>
+              <ChevronDown className="w-3.5 h-3.5" />
+            </button>
+
+            {isExportDropdownOpen && (
+              <>
+                <div
+                  className="fixed inset-0 z-40"
+                  onClick={() => setIsExportDropdownOpen(false)}
+                />
+                <div className="absolute right-0 top-full mt-1.5 w-60 bg-white border border-zinc-200 rounded-md shadow-xl z-50 py-1 divide-y divide-zinc-100 text-xs">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsExportDropdownOpen(false);
+                      setShowDossierModal(true);
+                    }}
+                    className="w-full px-3.5 py-2.5 text-left hover:bg-zinc-50 flex items-center gap-2.5 text-zinc-900 font-bold transition-colors cursor-pointer"
+                  >
+                    <FileDown className="w-4 h-4 text-zinc-700 shrink-0" />
+                    <div>
+                      <div>Dossiê em PDF</div>
+                      <div className="text-[10px] font-normal text-zinc-500">Relatório Oficial COAF / BACEN</div>
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setIsExportDropdownOpen(false);
+                      handleExportXml();
+                    }}
+                    className="w-full px-3.5 py-2.5 text-left hover:bg-zinc-50 flex items-center gap-2.5 text-zinc-900 font-bold transition-colors cursor-pointer"
+                  >
+                    <Code className="w-4 h-4 text-zinc-700 shrink-0" />
+                    <div>
+                      <div>Arquivo Estruturado XML</div>
+                      <div className="text-[10px] font-normal text-zinc-500">Leiaute SISCOAF / BACEN (RF-32)</div>
+                    </div>
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </div>
+
+      {/* Alerta de Aguardando Assinatura DIREX (RF-14, RNF02) */}
+      {activeCase.status === 'Aguardando Assinatura DIREX' && (
+        <div className="bg-purple-900 text-white px-6 py-3 flex flex-wrap items-center justify-between gap-4 border-b border-purple-800 text-xs shadow-md">
+          <div className="flex items-center gap-3">
+            <span className="bg-[#FFCC01] text-black px-2.5 py-1 rounded font-black text-[11px] uppercase tracking-wide flex items-center gap-1.5">
+              <ShieldCheck className="w-3.5 h-3.5 text-black" />
+              Aguardando Assinatura DIREX (RF-14)
+            </span>
+            <div>
+              <div className="text-white font-bold text-xs">
+                Dossiê Concluído pelo Analista ({activeCase.encerradoPor || 'Maísa Ramos'}) — Aguardando Homologação Executiva
+              </div>
+              <div className="text-purple-200 text-[11px]">
+                Enquadramento: <strong>{activeCase.decisaoGecanDetalhada?.tipologiaCoafDescricao || activeCase.parecer?.tipologiaCoaf || 'Comunicação COAF'}</strong> • Imutabilidade ativada (RNF02)
+              </div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2">
+            {currentUserRole === 'DIRETORIA' ? (
+              <>
+                <button
+                  onClick={() => {
+                    rejeitarDirex(activeCase.id, 'Retorno para diligência complementar solicitado pelo Diretor de Riscos.');
+                  }}
+                  className="px-3 py-1.5 bg-purple-800 hover:bg-purple-700 text-purple-100 font-bold rounded text-xs border border-purple-600 transition-colors cursor-pointer"
+                >
+                  Devolver para Diligência
+                </button>
+                <button
+                  onClick={() => {
+                    assinarDirex(activeCase.id, 'Dr. Roberto Guimarães (Diretor de Riscos e Compliance)', 'Comunicação homologada. Encaminhar ao SISCOAF no lote regulatório.');
+                  }}
+                  className="px-4 py-1.5 bg-[#FFCC01] hover:bg-[#E5B700] text-black font-black rounded text-xs flex items-center gap-1.5 border border-[#E5B700] transition-colors cursor-pointer shadow-xs"
+                >
+                  <CheckCircle className="w-4 h-4 text-black" />
+                  <span>Assinar Digitalmente (DIREX) & Liberar SISCOAF</span>
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={() => {
+                  setCurrentUserRole('DIRETORIA');
+                  showToast('Perfil alternado para Diretoria Executiva (DIREX)', 'info');
+                }}
+                className="px-3 py-1.5 bg-purple-800 hover:bg-purple-700 text-white font-bold rounded text-xs border border-purple-600 flex items-center gap-1.5 transition-colors cursor-pointer"
+              >
+                <span>Alternar para Perfil DIREX para Assinar</span>
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Assinatura Digital DIREX Concluída */}
+      {activeCase.status === 'Comunicado COAF' && activeCase.deliberacaoDirex?.aprovadoPor && (
+        <div className="bg-emerald-950 text-white px-6 py-2 flex flex-wrap items-center justify-between gap-3 border-b border-emerald-800 text-xs">
+          <div className="flex items-center gap-2">
+            <span className="bg-emerald-400 text-emerald-950 px-2 py-0.5 rounded font-black text-[10px] uppercase flex items-center gap-1">
+              <ShieldCheck className="w-3 h-3 text-emerald-950" />
+              Homologado DIREX (RF-14)
+            </span>
+            <span className="text-emerald-100">
+              Assinado digitalmente por <strong>{activeCase.deliberacaoDirex.aprovadoPor}</strong> em {activeCase.deliberacaoDirex.dataAprovacao}
+            </span>
+            <span className="font-mono text-emerald-300 text-[10px]">
+              [ICP-Brasil: {activeCase.deliberacaoDirex.certificadoDigitalIcpBrasil?.slice(0, 16)}...]
+            </span>
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="font-mono text-[#FFCC01] text-xs font-bold">
+              SISCOAF: {activeCase.decisaoGecanDetalhada?.numeroProtocoloSiscoaf || 'SISCOAF-2026-B94F'}
+            </span>
+          </div>
+        </div>
+      )}
+
+      {/* Alerta de Ficha Encerrada (RN-03, RF-22) */}
+      {isCaseClosed && activeCase.status !== 'Aguardando Assinatura DIREX' && (
+        <div className="bg-zinc-900 text-white px-6 py-2.5 flex flex-wrap items-center justify-between gap-3 border-b border-zinc-800 text-xs">
+          <div className="flex items-center gap-2">
+            <span className="bg-[#FFCC01] text-black px-2 py-0.5 rounded font-black text-[10px] uppercase">
+              Ficha Concluída / Encerrada
+            </span>
+            <span className="text-zinc-300">
+              Deliberação:{' '}
+              <strong className="text-white">
+                {activeCase.decisaoGecanDetalhada?.decisao || activeCase.status}
+              </strong>{' '}
+              {activeCase.decisaoGecanDetalhada?.numeroProtocoloSiscoaf && (
+                <span className="font-mono text-[#FFCC01] ml-2">
+                  [SISCOAF: {activeCase.decisaoGecanDetalhada.numeroProtocoloSiscoaf}]
+                </span>
+              )}
+            </span>
+            {activeCase.encerradoPor && (
+              <span className="text-zinc-400 text-[11px]">
+                (Encerrado por {activeCase.encerradoPor} em {activeCase.encerradoEm})
+              </span>
+            )}
+          </div>
+
+          <button
+            onClick={() => setShowReaberturaModal(true)}
+            className="px-3 py-1 bg-[#FFCC01] hover:bg-[#E5B700] text-black font-bold rounded text-xs flex items-center gap-1.5 border border-[#E5B700] transition-colors cursor-pointer"
+          >
+            <RotateCcw className="w-3.5 h-3.5 text-black" />
+            <span>Reabrir Ficha (GECAN)</span>
+          </button>
+        </div>
+      )}
 
       {/* Info Subheader Bar */}
       <div className="bg-[#FFFFFF] border-b border-[#E5E7EB] px-6 py-3 shadow-2xs">
@@ -289,7 +572,7 @@ export const InvestigationView: React.FC = () => {
                   ? 'bg-[#DC2626]'
                   : activeCase.status === 'Diligência'
                   ? 'bg-[#EA580C]'
-                  : 'bg-[#2563EB]'
+                  : 'bg-zinc-800'
               }`}
             >
               {activeCase.status}
@@ -516,6 +799,73 @@ export const InvestigationView: React.FC = () => {
               )}
             </div>
 
+            {/* Accordion 3.2: Contratos de Crédito Ativos no Momento da Seleção (Snapshot Cadastral RF-09, RF-10) */}
+            <div className="bg-[#FFFFFF] border border-[#D1D5DB] rounded-sm overflow-hidden shadow-xs">
+              <button
+                onClick={() => toggleSection('contratos')}
+                className="w-full bg-[#E5E7EB] hover:bg-[#DCDFE4] p-3 text-left flex items-center justify-between text-xs font-bold text-[#111827] transition-colors cursor-pointer"
+              >
+                <div className="flex items-center gap-1.5">
+                  <Landmark className="w-3.5 h-3.5 text-zinc-700" />
+                  <span>Contratos de Crédito Ativos no Momento da Seleção (Snapshot RF-09)</span>
+                  <span className="ml-1 bg-zinc-200 text-zinc-800 text-[10px] px-1.5 py-0.2 rounded font-mono font-bold">
+                    {activeCase.snapshotCadastral?.contratosCreditoAtivos?.length || 2} contratos
+                  </span>
+                </div>
+                <div className="w-5 h-5 rounded bg-[#FFCC01] flex items-center justify-center text-[#111827]">
+                  {openSections.contratos ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                </div>
+              </button>
+
+              {openSections.contratos && (
+                <div className="p-4 text-xs bg-[#FFFFFF] border-t border-[#E5E7EB]">
+                  <ContratosCreditoTab
+                    contratos={activeCase.snapshotCadastral?.contratosCreditoAtivos}
+                    limocAtivo={activeCase.snapshotCadastral?.limocAtivo}
+                    limocValor={activeCase.snapshotCadastral?.limocValor}
+                  />
+                </div>
+              )}
+            </div>
+
+            {/* Accordion 3.5: Exigências Específicas do Dossiê por Público Alvo (PEP, Mineração, Terceiros, Menor, Cooperforte, LIMOC) */}
+            <div className="bg-[#FFFFFF] border border-[#D1D5DB] rounded-sm overflow-hidden shadow-xs border-t-2 border-t-[#2563EB]">
+              <button
+                onClick={() => toggleSection('dossieReqs')}
+                className="w-full bg-[#E5E7EB] hover:bg-[#DCDFE4] p-3 text-left flex items-center justify-between text-xs font-bold text-[#111827] transition-colors"
+              >
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[#1E40AF] font-black">Requisitos & Exigências Específicas do Dossiê por Categoria</span>
+                  <HelpCircle className="w-3.5 h-3.5 text-[#374151]" />
+                  <span className="ml-2 px-2 py-0.5 bg-[#DBEAFE] text-[#1E40AF] rounded text-[10px] font-bold">
+                    {activeCase.validacaoDossie?.tituloCategoria || 'Validação de Público Ativa'}
+                  </span>
+                </div>
+                <div className="w-5 h-5 rounded bg-[#FFCC01] flex items-center justify-center text-[#111827]">
+                  {openSections.dossieReqs ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                </div>
+              </button>
+
+              {openSections.dossieReqs && (
+                <div className="p-4 text-xs bg-[#FFFFFF] border-t border-[#E5E7EB]">
+                  <DossierRequirementsSection
+                    caso={activeCase}
+                    onUpdateValidation={(validation: ValidacaoCategoriaDossie) => {
+                      updateDossierValidation(activeCase.id, validation);
+                      showToast(`Exigências do dossiê atualizadas (${validation.tituloCategoria})`, 'info');
+                    }}
+                    onInsertEvidenceToNotes={(text: string) => {
+                      setAnotacoes((prev) => {
+                        const sep = prev.trim() ? '\n\n' : '';
+                        return prev + sep + text;
+                      });
+                      showToast('Item de validação inserido na fundamentação do parecer!', 'info');
+                    }}
+                  />
+                </div>
+              )}
+            </div>
+
             {/* Accordion 4: Capacidade Financeira & Origem dos Recursos (Expanded by default with top yellow line) */}
             <div className="bg-[#FFFFFF] border border-[#D1D5DB] rounded-sm overflow-hidden shadow-xs border-t-2 border-t-[#FFCC01]">
               <button
@@ -686,7 +1036,7 @@ export const InvestigationView: React.FC = () => {
                   <span>Extrato Analítico de Transações ({filteredTransactions.length} exibidas de {canonicalGraph.totalTransacoesAvaliadas.toLocaleString('pt-BR')} avaliadas)</span>
                   <HelpCircle className="w-3.5 h-3.5 text-[#374151]" />
                   {extratoPersonFilter && (
-                    <span className="ml-2 px-2 py-0.5 bg-blue-100 text-blue-900 rounded-full text-[10px] font-bold border border-blue-300">
+                    <span className="ml-2 px-2 py-0.5 bg-[#FEF08A] text-[#854D0E] rounded-full text-[10px] font-bold border border-amber-300">
                       Filtrado: {extratoPersonFilter}
                     </span>
                   )}
@@ -765,8 +1115,8 @@ export const InvestigationView: React.FC = () => {
                         }}
                         className={`px-2.5 py-1 rounded-md text-[11px] font-bold transition-all ${
                           extratoFilterType === 'ESPECIE' && !extratoPersonFilter
-                            ? 'bg-blue-800 text-white shadow-xs'
-                            : 'bg-white text-blue-800 hover:bg-blue-50 border border-blue-300'
+                            ? 'bg-zinc-800 text-white shadow-xs'
+                            : 'bg-white text-zinc-700 hover:bg-zinc-100 border border-zinc-300'
                         }`}
                       >
                         Espécie (Dinheiro)
@@ -831,7 +1181,7 @@ export const InvestigationView: React.FC = () => {
                               <span
                                 className={`px-1.5 py-0.2 rounded text-[10px] font-bold ${
                                   tx.metodo === 'Espécie'
-                                    ? 'bg-blue-100 text-blue-800 border border-blue-200'
+                                    ? 'bg-amber-100 text-amber-900 border border-amber-300'
                                     : tx.metodo === 'PIX'
                                     ? 'bg-emerald-100 text-emerald-800 border border-emerald-200'
                                     : 'bg-zinc-100 text-zinc-700 border border-zinc-200'
@@ -869,242 +1219,101 @@ export const InvestigationView: React.FC = () => {
           </div>
 
           {/* ========================================================================= */}
-          {/* RIGHT SIDEBAR COLUMN: Resumo da Análise PLD/FT                            */}
+          {/* RIGHT SIDEBAR COLUMN: Checklist do Analista, Parecer & Deliberação        */}
           {/* ========================================================================= */}
           <div className="lg:col-span-4 space-y-4">
+            {/* Checklist do Analista & Diretrizes da Matriz de Pessoas */}
+            <PersonAnalysisActionGuide
+              caso={activeCase}
+              onAppendParecer={(texto) => setAnotacoes((prev) => (prev ? prev + texto : texto))}
+              checklist={checklist}
+              onToggleCheck={toggleCheck}
+              isCaseClosed={isCaseClosed}
+            />
+
             <div className="bg-[#FFFFFF] border border-[#D1D5DB] rounded-sm p-4 shadow-xs space-y-4">
-              {/* Header Title */}
-              <h2 className="text-center font-bold text-[#111827] text-xs uppercase tracking-wide border-b border-[#E5E7EB] pb-2">
-                Resumo da Análise PLD/FT
-              </h2>
-
-              {/* PLD Regulatory Checklist */}
-              <div className="space-y-2.5 text-xs">
-                {/* 1. Identificação e Qualificação (KYC) */}
-                <div className="flex items-center justify-between cursor-pointer py-1" onClick={() => toggleCheck('qualificacaoKyc')}>
-                  <div className="flex items-center gap-1.5 font-bold text-[#111827]">
-                    <span>Identificação e Qualificação (KYC)</span>
-                    <HelpCircle className="w-3.5 h-3.5 text-zinc-500" />
-                  </div>
-                  {checklist.qualificacaoKyc ? (
-                    <CheckSquare className="w-5 h-5 text-[#16A34A]" />
-                  ) : (
-                    <Square className="w-5 h-5 text-zinc-400" />
-                  )}
-                </div>
-
-                {/* 2. Compatibilidade Renda / Faturamento */}
-                <div className="flex items-center justify-between cursor-pointer py-1" onClick={() => toggleCheck('capacidadeFinanceira')}>
-                  <div className="flex items-center gap-1.5 font-bold text-[#111827]">
-                    <span>Compatibilidade Renda / Faturamento</span>
-                    <HelpCircle className="w-3.5 h-3.5 text-zinc-500" />
-                  </div>
-                  {checklist.capacidadeFinanceira ? (
-                    <CheckSquare className="w-5 h-5 text-[#16A34A]" />
-                  ) : (
-                    <Square className="w-5 h-5 text-zinc-400" />
-                  )}
-                </div>
-
-                {/* 3. Consulta a Listas Restritivas (OFAC/CEIS) */}
-                <div className="flex items-center justify-between cursor-pointer py-1" onClick={() => toggleCheck('listasRestritivas')}>
-                  <div className="flex items-center gap-1.5 font-bold text-[#111827]">
-                    <span>Consulta a Listas Restritivas (OFAC/CEIS)</span>
-                    <HelpCircle className="w-3.5 h-3.5 text-zinc-500" />
-                  </div>
-                  {checklist.listasRestritivas ? (
-                    <CheckSquare className="w-5 h-5 text-[#16A34A]" />
-                  ) : (
-                    <Square className="w-5 h-5 text-zinc-400" />
-                  )}
-                </div>
-
-                {/* 4. Checagem PEP e Pessoas Vinculadas */}
-                <div className="flex items-center justify-between cursor-pointer py-1" onClick={() => toggleCheck('enquadramentoPep')}>
-                  <div className="flex items-center gap-1.5 font-bold text-[#111827]">
-                    <span>Checagem PEP e Vinculados</span>
-                    <HelpCircle className="w-3.5 h-3.5 text-zinc-500" />
-                  </div>
-                  {checklist.enquadramentoPep ? (
-                    <CheckSquare className="w-5 h-5 text-[#16A34A]" />
-                  ) : (
-                    <Square className="w-5 h-5 text-zinc-400" />
-                  )}
-                </div>
-
-                {/* 5. Vínculos Societários & QSA */}
-                <div className="flex items-center justify-between cursor-pointer py-1" onClick={() => toggleCheck('vinculosSocietarios')}>
-                  <div className="flex items-center gap-1.5 font-bold text-[#111827]">
-                    <span>Vínculos Societários & QSA</span>
-                    <HelpCircle className="w-3.5 h-3.5 text-zinc-500" />
-                  </div>
-                  {checklist.vinculosSocietarios ? (
-                    <CheckSquare className="w-5 h-5 text-[#16A34A]" />
-                  ) : (
-                    <Square className="w-5 h-5 text-zinc-400" />
-                  )}
-                </div>
-
-                {/* 6. Rastreabilidade de Origem e Destino */}
-                <div className="flex items-center justify-between cursor-pointer py-1" onClick={() => toggleCheck('origemDestinoRecursos')}>
-                  <div className="flex items-center gap-1.5 font-bold text-[#111827]">
-                    <span>Rastreabilidade de Origem e Destino</span>
-                    <HelpCircle className="w-3.5 h-3.5 text-zinc-500" />
-                  </div>
-                  {checklist.origemDestinoRecursos ? (
-                    <CheckSquare className="w-5 h-5 text-[#16A34A]" />
-                  ) : (
-                    <Square className="w-5 h-5 text-zinc-400" />
-                  )}
-                </div>
-
-                {/* 7. Mídias Desabonadoras & Processos */}
-                <div className="flex items-center justify-between cursor-pointer py-1" onClick={() => toggleCheck('midiasDesabonadoras')}>
-                  <div className="flex items-center gap-1.5 font-bold text-[#111827]">
-                    <span>Mídias Desabonadoras & Processos</span>
-                    <HelpCircle className="w-3.5 h-3.5 text-zinc-500" />
-                  </div>
-                  {checklist.midiasDesabonadoras ? (
-                    <CheckSquare className="w-5 h-5 text-[#16A34A]" />
-                  ) : (
-                    <Square className="w-5 h-5 text-zinc-400" />
-                  )}
-                </div>
-
-                {/* 8. Análise de Fracionamento / Smurfing */}
-                <div className="flex items-center justify-between cursor-pointer py-1" onClick={() => toggleCheck('analiseFracionamento')}>
-                  <div className="flex items-center gap-1.5 font-bold text-[#111827]">
-                    <span>Análise de Fracionamento / Smurfing</span>
-                    <HelpCircle className="w-3.5 h-3.5 text-zinc-500" />
-                  </div>
-                  {checklist.analiseFracionamento ? (
-                    <CheckSquare className="w-5 h-5 text-[#16A34A]" />
-                  ) : (
-                    <Square className="w-5 h-5 text-zinc-400" />
-                  )}
-                </div>
-
-                {/* 9. Verificação de Contas de Passagem */}
-                <div className="flex items-center justify-between cursor-pointer py-1" onClick={() => toggleCheck('contasPassagem')}>
-                  <div className="flex items-center gap-1.5 font-bold text-[#111827]">
-                    <span>Verificação de Conta de Passagem</span>
-                    <HelpCircle className="w-3.5 h-3.5 text-zinc-500" />
-                  </div>
-                  {checklist.contasPassagem ? (
-                    <CheckSquare className="w-5 h-5 text-[#16A34A]" />
-                  ) : (
-                    <Square className="w-5 h-5 text-zinc-400" />
-                  )}
-                </div>
-              </div>
-
-              {/* Smart Snippets Quick Insertion Box */}
-              <div className="pt-2 border-t border-[#E5E7EB] space-y-2">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1 text-[11px] font-bold text-[#111827]">
-                    <Sparkles className="w-3.5 h-3.5 text-[#F59E0B]" />
-                    <span>Snippets de Parecer PLD:</span>
-                  </div>
-                  <span className="text-[10px] text-zinc-500">Clique para inserir</span>
-                </div>
-
-                <div className="grid grid-cols-2 gap-1.5 max-h-36 overflow-y-auto pr-1">
-                  {mockSnippets.map((snip) => (
-                    <button
-                      key={snip.id}
-                      onClick={() => handleInsertSnippet(snip.texto, snip.id)}
-                      className={`p-1.5 rounded text-left border text-[10px] font-semibold transition-all ${
-                        lastInsertedSnippet === snip.id
-                          ? 'bg-[#DCFCE7] border-[#22C55E] text-[#15803D]'
-                          : 'bg-[#F9FAFB] hover:bg-[#FEF9C3] border-[#E5E7EB] text-[#374151] hover:text-[#111827]'
-                      }`}
-                      title={snip.texto}
-                    >
-                      <div className="font-bold truncate">{snip.titulo}</div>
-                      <div className="text-[9px] text-zinc-500 truncate">{snip.categoria}</div>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Anotações / Parecer Técnico */}
-              <div className="space-y-1 pt-1">
-                <label className="block text-xs font-bold text-[#111827]">Anotações / Fundamentação do Parecer PLD</label>
-                <textarea
-                  value={anotacoes}
-                  onChange={(e) => setAnotacoes(e.target.value)}
-                  placeholder="Ex.: Operação atípica em desacordo com o faturamento declarado..."
-                  rows={4}
-                  className="w-full bg-[#FFFFFF] border border-[#D1D5DB] rounded p-2.5 text-xs text-[#111827] placeholder-zinc-400 focus:outline-none focus:border-[#FFCC01] focus:ring-1 focus:ring-[#FFCC01] resize-none"
+              {/* Parecer Técnico & Versionamento Append-Only (RF-17, RF-18, RF-19, RN-02, RN-03) */}
+              <div>
+                <ParecerVersionamentoSection
+                  caso={activeCase}
+                  readOnly={isCaseClosed}
+                  texto={anotacoes}
+                  onChangeTexto={setAnotacoes}
                 />
               </div>
 
-              {/* Motivo / Deliberação Regulatória */}
-              <div className="space-y-1">
-                <label className="block text-xs font-bold text-[#111827]">Deliberação Regulatória:</label>
-                <select
-                  value={deliberacao}
-                  onChange={(e) => setDeliberacao(e.target.value as any)}
-                  className="w-full bg-[#FFFFFF] border border-[#D1D5DB] rounded p-2 text-xs text-[#111827] font-semibold focus:outline-none focus:border-[#FFCC01]"
-                >
-                  <option value="ARQUIVAR">Arquivar (Falso Positivo / Atipicidade Justificada)</option>
-                  <option value="DILIGENCIA">Solicitar Diligência (Exigência Documental)</option>
-                  <option value="COMUNICAR_COAF">Comunicar ao COAF (Comunicação SISCOAF)</option>
-                  <option value="BLOQUEIO_CAUTELAR">Bloqueio Cautelar / Encerramento</option>
-                </select>
-              </div>
-
-              {/* COAF Specific Category */}
-              {(deliberacao === 'COMUNICAR_COAF' || deliberacao === 'BLOQUEIO_CAUTELAR') && (
-                <div className="p-2.5 rounded bg-red-50 border border-red-200 space-y-1">
-                  <label className="text-[11px] font-bold text-red-800 block">Enquadramento / Tipologia COAF:</label>
-                  <select
-                    value={tipologiaCoaf}
-                    onChange={(e) => setTipologiaCoaf(e.target.value)}
-                    className="w-full bg-[#FFFFFF] border border-red-300 text-[11px] rounded p-1.5 text-[#111827]"
-                  >
-                    {coafTipologias.map((tip, idx) => (
-                      <option key={idx} value={tip}>
-                        {tip}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
-
-              {/* Final Action Buttons */}
+              {/* Deliberação & Encerramento GECAN (RF-20, RF-21, RN-03) */}
               <div className="pt-2 space-y-2">
+                {isCaseClosed ? (
+                  <div className="bg-zinc-100 border border-zinc-300 rounded p-3 text-xs space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="font-bold text-zinc-900 uppercase text-[11px]">Deliberação Homologada</span>
+                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                        activeCase.status === 'Comunicado COAF' ? 'bg-red-100 text-red-800' : 'bg-emerald-100 text-emerald-800'
+                      }`}>
+                        {activeCase.decisaoGecanDetalhada?.decisao || activeCase.status}
+                      </span>
+                    </div>
+                    {activeCase.decisaoGecanDetalhada?.numeroProtocoloSiscoaf && (
+                      <div className="bg-white border border-zinc-200 p-2 rounded text-[11px] font-mono">
+                        Protocolo SISCOAF: <strong>{activeCase.decisaoGecanDetalhada.numeroProtocoloSiscoaf}</strong>
+                      </div>
+                    )}
+                    <button
+                      type="button"
+                      onClick={() => setShowReaberturaModal(true)}
+                      className="w-full py-2 bg-[#FFCC01] hover:bg-[#E5B700] text-black font-bold text-xs rounded border border-[#E5B700] flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+                    >
+                      <RotateCcw className="w-3.5 h-3.5" />
+                      <span>Reabrir Ficha Concluída (GECAN)</span>
+                    </button>
+                  </div>
+                ) : (
+                  <button
+                    type="button"
+                    onClick={() => setShowDecisaoGecanModal(true)}
+                    className="w-full py-2.5 bg-[#FFCC01] hover:bg-[#E5B700] text-black text-xs font-black rounded shadow-xs border border-[#E5B700] transition-colors flex items-center justify-center gap-1.5 active:scale-[0.99] cursor-pointer"
+                  >
+                    <FileCheck className="w-4 h-4" />
+                    <span>Encerrar Ficha / Deliberação GECAN (RF-20)</span>
+                  </button>
+                )}
+
                 <button
-                  onClick={handleFinalize}
-                  className="w-full py-2.5 bg-[#FFCC01] hover:bg-[#E5B700] text-[#111827] text-xs font-black rounded shadow-xs border border-[#E5B700] transition-colors flex items-center justify-center gap-1.5 active:scale-[0.99]"
+                  type="button"
+                  onClick={handleSave}
+                  disabled={isCaseClosed}
+                  className="w-full py-2.5 bg-[#FFCC01] hover:bg-[#E5B700] text-black text-xs font-black rounded border border-[#E5B700] transition-colors flex items-center justify-center gap-2 shadow-xs cursor-pointer disabled:opacity-50"
+                  title="Salvar alterações na ficha técnica e parecer"
                 >
-                  <CheckCircle className="w-4 h-4" />
-                  <span>Finalizar Parecer PLD</span>
+                  <Save className="w-4 h-4 text-black" />
+                  <span>Salvar</span>
                 </button>
-
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    onClick={handleSave}
-                    className="py-2 bg-[#FFFFFF] hover:bg-[#F3F4F6] text-[#374151] text-xs font-bold rounded border border-[#D1D5DB] transition-colors flex items-center justify-center gap-1.5 shadow-2xs"
-                  >
-                    <Save className="w-3.5 h-3.5 text-zinc-500" />
-                    <span>Salvar Rascunho</span>
-                  </button>
-
-                  <button
-                    onClick={() => setShowDossierModal(true)}
-                    className="py-2 bg-[#111827] hover:bg-black text-[#FFCC01] text-xs font-black rounded border border-[#111827] transition-colors flex items-center justify-center gap-1.5 shadow-2xs"
-                    title="Exportar Ficha Oficial COAF com a Avaliação Atual"
-                  >
-                    <FileDown className="w-3.5 h-3.5" />
-                    <span>Exportar PDF</span>
-                  </button>
-                </div>
               </div>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Modal Decisao GECAN (RF-20, RF-21, RN-03) */}
+      <DecisaoGecanModal
+        caso={activeCase}
+        isOpen={showDecisaoGecanModal}
+        onClose={() => setShowDecisaoGecanModal(false)}
+        onSuccess={() => {
+          showToast('Ficha encerrada com deliberação colegiada GECAN!', 'success');
+        }}
+      />
+
+      {/* Modal Reabertura de Ficha (RF-22, RF-23, RN-04) */}
+      <ReaberturaModal
+        caso={activeCase}
+        isOpen={showReaberturaModal}
+        onClose={() => setShowReaberturaModal(false)}
+        onSuccess={() => {
+          showToast('Ficha reaberta para análise com sucesso!', 'info');
+        }}
+      />
 
       {/* Dossier PDF Modal */}
       {showDossierModal && (
@@ -1140,6 +1349,47 @@ export const InvestigationView: React.FC = () => {
             >
               Fechar
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Modal de Confirmação para Sair sem Salvar */}
+      {showUnsavedExitModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+          <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-5 border border-zinc-200 text-xs space-y-4">
+            <div className="flex items-start gap-3">
+              <div className="w-10 h-10 rounded-full bg-amber-100 flex items-center justify-center shrink-0 text-amber-700">
+                <AlertTriangle className="w-5 h-5" />
+              </div>
+              <div className="space-y-1">
+                <h3 className="text-sm font-bold text-zinc-900">
+                  Deseja sair sem salvar?
+                </h3>
+                <p className="text-zinc-600 leading-relaxed text-xs">
+                  Você possui alterações na ficha que ainda não foram salvas. Se sair agora, as alterações serão descartadas e a ficha retornará à minuta original.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-zinc-100">
+              <button
+                type="button"
+                onClick={() => setShowUnsavedExitModal(false)}
+                className="px-3.5 py-2 rounded bg-zinc-100 hover:bg-zinc-200 text-zinc-800 font-bold transition-colors cursor-pointer"
+              >
+                Permanecer na Ficha
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowUnsavedExitModal(false);
+                  navigateTo('/');
+                }}
+                className="px-4 py-2 rounded bg-[#FFCC01] hover:bg-[#E5B700] text-black font-bold border border-[#E5B700] shadow-xs transition-colors cursor-pointer"
+              >
+                Sair sem Salvar
+              </button>
+            </div>
           </div>
         </div>
       )}

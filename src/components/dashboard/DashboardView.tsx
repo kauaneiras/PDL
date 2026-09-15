@@ -107,10 +107,10 @@ export const DashboardView: React.FC = () => {
 
           <button
             onClick={() => navigateTo('/')}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[#FFCC01] hover:bg-[#E5B700] text-zinc-950 font-bold text-xs transition-colors cursor-pointer"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-[#FFCC01] hover:bg-[#E5B700] text-black font-bold text-xs border border-[#E5B700] transition-colors cursor-pointer shadow-xs"
           >
             <span>Ver Fila ({casos.length})</span>
-            <ChevronRight className="w-3.5 h-3.5" />
+            <ChevronRight className="w-3.5 h-3.5 text-black" />
           </button>
         </div>
       </div>
@@ -354,9 +354,10 @@ export const DashboardView: React.FC = () => {
           </div>
           <button
             onClick={() => navigateTo('/')}
-            className="text-xs font-bold text-zinc-900 hover:underline flex items-center gap-1 cursor-pointer"
+            className="px-3 py-1.5 rounded-md bg-[#FFCC01] hover:bg-[#E5B700] text-black font-bold text-xs border border-[#E5B700] flex items-center gap-1 cursor-pointer transition-colors shadow-xs"
           >
-            Ver todos ({casos.length}) <ChevronRight className="w-3.5 h-3.5" />
+            <span>Ver todos ({casos.length})</span>
+            <ChevronRight className="w-3.5 h-3.5 text-black" />
           </button>
         </div>
 

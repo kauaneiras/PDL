@@ -284,11 +284,11 @@ export const GraphView: React.FC<GraphViewProps> = ({
             onClick={() => setFilterRelation('ATTRIBUTE')}
             className={`px-2.5 py-1 rounded-full text-[11px] font-bold flex items-center gap-1 transition-all ${
               filterRelation === 'ATTRIBUTE'
-                ? 'bg-blue-800 text-white shadow-xs'
-                : 'bg-blue-50 text-blue-800 hover:bg-blue-100 border border-blue-200'
+                ? 'bg-zinc-800 text-white shadow-xs'
+                : 'bg-zinc-100 text-zinc-800 hover:bg-zinc-200 border border-zinc-300'
             }`}
           >
-            <span className="w-2 h-2 rounded-full bg-blue-500" />
+            <span className="w-2 h-2 rounded-full bg-zinc-500" />
             Atributos & Dossiê
           </button>
         </div>
@@ -386,7 +386,7 @@ export const GraphView: React.FC<GraphViewProps> = ({
             </div>
             <div className="bg-zinc-50 p-1.5 rounded border border-zinc-200">
               <span className="text-zinc-500 block text-[9px]">Volume Auditado</span>
-              <span className="font-black text-blue-700 font-mono text-xs">
+              <span className="font-black text-zinc-950 font-mono text-xs">
                 R$ {(totalVolumeGeral || 2485900).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
               </span>
             </div>
@@ -408,7 +408,7 @@ export const GraphView: React.FC<GraphViewProps> = ({
                       : selectedNodeData.type === 'MAIN' || selectedNodeData.type === 'HIGH_RISK'
                       ? 'bg-red-600'
                       : selectedNodeData.type === 'HUB_CC'
-                      ? 'bg-blue-600'
+                      ? 'bg-zinc-900 text-[#FFCC01]'
                       : 'bg-zinc-600'
                   }`}
                 >
@@ -472,9 +472,9 @@ export const GraphView: React.FC<GraphViewProps> = ({
               {/* Financial Metrics */}
               {selectedNodeData.totalVolume !== undefined && (
                 <div className="grid grid-cols-2 gap-2 text-center">
-                  <div className="p-2 bg-blue-50/70 border border-blue-200 rounded-lg">
-                    <span className="text-blue-800 text-[10px] font-bold block">Volume Transacionado</span>
-                    <span className="font-black text-blue-950 font-mono text-xs">
+                  <div className="p-2 bg-zinc-100 border border-zinc-300 rounded-lg">
+                    <span className="text-zinc-700 text-[10px] font-bold block">Volume Transacionado</span>
+                    <span className="font-black text-zinc-950 font-mono text-xs">
                       R$ {selectedNodeData.totalVolume.toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                     </span>
                   </div>
@@ -574,7 +574,7 @@ export const GraphView: React.FC<GraphViewProps> = ({
 
         {/* Selected Flow / Edge Deep Inspection Drawer */}
         {selectedEdgeData && (
-          <div className="absolute bottom-3 right-3 w-96 max-w-[calc(100vw-32px)] max-h-[460px] bg-[#FFFFFF]/98 backdrop-blur-md border-2 border-blue-500 rounded-2xl p-4 shadow-2xl z-30 flex flex-col text-xs overflow-hidden animate-in fade-in slide-in-from-bottom-3 duration-200">
+          <div className="absolute bottom-3 right-3 w-96 max-w-[calc(100vw-32px)] max-h-[460px] bg-[#FFFFFF]/98 backdrop-blur-md border-2 border-zinc-800 rounded-2xl p-4 shadow-2xl z-30 flex flex-col text-xs overflow-hidden animate-in fade-in slide-in-from-bottom-3 duration-200">
             {/* Header */}
             <div className="flex items-start justify-between pb-2.5 border-b border-zinc-200">
               <div className="flex items-center gap-2.5">
@@ -583,7 +583,7 @@ export const GraphView: React.FC<GraphViewProps> = ({
                     selectedEdgeData.edge.data?.isSuspeita
                       ? 'bg-red-600'
                       : selectedEdgeData.edge.data?.isBidirecional
-                      ? 'bg-blue-600'
+                      ? 'bg-zinc-900 text-[#FFCC01]'
                       : 'bg-slate-800'
                   }`}
                 >
@@ -619,9 +619,9 @@ export const GraphView: React.FC<GraphViewProps> = ({
             <div className="flex-1 overflow-y-auto space-y-3 py-3 pr-1">
               {/* Financial Metrics */}
               <div className="grid grid-cols-2 gap-2 text-center">
-                <div className="p-2 bg-blue-50/80 border border-blue-200 rounded-lg">
-                  <span className="text-blue-800 text-[10px] font-bold block">Volume Total Auditado</span>
-                  <span className="font-black text-blue-950 font-mono text-xs">
+                <div className="p-2 bg-zinc-100 border border-zinc-300 rounded-lg">
+                  <span className="text-zinc-700 text-[10px] font-bold block">Volume Total Auditado</span>
+                  <span className="font-black text-zinc-950 font-mono text-xs">
                     R$ {(selectedEdgeData.edge.data?.valor || 0).toLocaleString('pt-BR', { minimumFractionDigits: 2 })}
                   </span>
                 </div>
@@ -645,7 +645,7 @@ export const GraphView: React.FC<GraphViewProps> = ({
                     {selectedEdgeData.edge.data?.isSuspeita ? (
                       <AlertTriangle className="w-3.5 h-3.5 text-red-600" />
                     ) : (
-                      <Info className="w-3.5 h-3.5 text-blue-600" />
+                      <Info className="w-3.5 h-3.5 text-zinc-600" />
                     )}
                     Característica do Elo Transacional:
                   </span>
@@ -745,11 +745,11 @@ export const GraphView: React.FC<GraphViewProps> = ({
             </div>
 
             {/* CC Hub */}
-            <div className="flex items-center gap-1.5 bg-blue-50/80 px-2 py-0.5 rounded border border-blue-200">
-              <span className="w-4 h-4 rounded-full bg-blue-600 text-white font-black text-[7.5px] flex items-center justify-center shadow-2xs">
+            <div className="flex items-center gap-1.5 bg-[#FFCC01]/15 px-2 py-0.5 rounded border border-[#E5B700]">
+              <span className="w-4 h-4 rounded-full bg-[#111827] text-[#FFCC01] font-black text-[7.5px] flex items-center justify-center shadow-2xs">
                 CC
               </span>
-              <span className="font-bold text-blue-900">HUB Conta Corrente</span>
+              <span className="font-bold text-zinc-950">HUB Conta Corrente</span>
             </div>
 
             {/* Family Members */}
@@ -779,7 +779,7 @@ export const GraphView: React.FC<GraphViewProps> = ({
             {/* Edge Indicators */}
             <div className="flex items-center gap-3 pl-2 border-l border-zinc-300 text-[10.5px]">
               <div className="flex items-center gap-1 bg-slate-50 px-1.5 py-0.5 rounded border border-slate-200">
-                <ArrowLeftRight className="w-3 h-3 text-blue-600 stroke-[2.5]" />
+                <ArrowLeftRight className="w-3 h-3 text-zinc-800 stroke-[2.5]" />
                 <span className="text-zinc-700 font-bold">⇄ Bidirecional (Recíproco)</span>
               </div>
 
@@ -793,9 +793,9 @@ export const GraphView: React.FC<GraphViewProps> = ({
                 <span className="text-slate-300 font-sans font-normal ml-0.5 text-[9.5px]">Qtd. Transações</span>
               </div>
 
-              <div className="flex items-center gap-1 bg-blue-50 text-blue-900 px-1.5 py-0.5 rounded border border-blue-200 font-mono font-bold text-[10px]">
+              <div className="flex items-center gap-1 bg-zinc-100 text-zinc-900 px-1.5 py-0.5 rounded border border-zinc-300 font-mono font-bold text-[10px]">
                 R$ Volume
-                <span className="text-blue-700 font-sans font-normal ml-0.5 text-[9.5px]">(Espessura)</span>
+                <span className="text-zinc-600 font-sans font-normal ml-0.5 text-[9.5px]">(Espessura)</span>
               </div>
             </div>
           </div>

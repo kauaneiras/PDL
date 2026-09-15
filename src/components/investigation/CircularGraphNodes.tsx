@@ -64,29 +64,29 @@ export const CircularHubNode: React.FC<NodeProps> = ({ data, selected }) => {
 
   return (
     <div className="relative group cursor-pointer">
-      <Handle type="target" position={Position.Left} className="!w-2 !h-2 !bg-sky-600 !border-0 !opacity-0" />
-      <Handle type="source" position={Position.Right} className="!w-2 !h-2 !bg-sky-600 !border-0 !opacity-0" />
-      <Handle type="target" position={Position.Top} className="!w-2 !h-2 !bg-sky-600 !border-0 !opacity-0" />
-      <Handle type="source" position={Position.Bottom} className="!w-2 !h-2 !bg-sky-600 !border-0 !opacity-0" />
+      <Handle type="target" position={Position.Left} className="!w-2 !h-2 !bg-transparent !border-0 !opacity-0" />
+      <Handle type="source" position={Position.Right} className="!w-2 !h-2 !bg-transparent !border-0 !opacity-0" />
+      <Handle type="target" position={Position.Top} className="!w-2 !h-2 !bg-transparent !border-0 !opacity-0" />
+      <Handle type="source" position={Position.Bottom} className="!w-2 !h-2 !bg-transparent !border-0 !opacity-0" />
 
-      {/* Blue Concentric Circle with "CC" in center */}
+      {/* Gold/Black Concentric Circle with "CC" in center */}
       <div
-        className={`w-14 h-14 rounded-full flex items-center justify-center transition-all duration-300 bg-blue-50 border-2 border-blue-600 ${
+        className={`w-14 h-14 rounded-full flex items-center justify-center transition-all duration-300 bg-[#FFCC01]/15 border-2 border-[#E5B700] ${
           selected
-            ? 'ring-4 ring-blue-400 ring-offset-2 scale-110 shadow-lg'
+            ? 'ring-4 ring-[#FFCC01] ring-offset-2 scale-110 shadow-lg'
             : 'hover:scale-105 shadow-md'
         }`}
       >
-        <div className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center font-black text-sm tracking-tight border-2 border-white shadow-xs">
+        <div className="w-10 h-10 rounded-full bg-[#111827] text-[#FFCC01] flex items-center justify-center font-black text-sm tracking-tight border-2 border-white shadow-xs">
           CC
         </div>
       </div>
 
       <div className="absolute top-full left-1/2 -translate-x-1/2 mt-1.5 whitespace-nowrap z-20 pointer-events-none text-center">
-        <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-blue-900 text-white shadow-md block border border-blue-400">
+        <span className="px-2 py-0.5 rounded-full text-[10px] font-black bg-[#111827] text-[#FFCC01] shadow-md block border border-zinc-700">
           {nodeData.label || 'Conta Corrente Principal'}
         </span>
-        <span className="text-[9px] font-semibold text-blue-800 bg-white/95 px-1.5 py-0.2 rounded mt-0.5 inline-block shadow-2xs border border-blue-200">
+        <span className="text-[9px] font-bold text-zinc-900 bg-white/95 px-1.5 py-0.2 rounded mt-0.5 inline-block shadow-2xs border border-zinc-300">
           {nodeData.subLabel || 'HUB de Movimentação'}
         </span>
       </div>
@@ -171,13 +171,13 @@ export const CircularAttributeNode: React.FC<NodeProps> = ({ data, selected }) =
 
   switch (attrType) {
     case 'globe':
-      bgColor = 'bg-blue-800';
-      borderColor = 'border-blue-600';
+      bgColor = 'bg-zinc-800';
+      borderColor = 'border-zinc-600';
       icon = <Globe2 className="w-3.5 h-3.5 text-white" />;
       break;
     case 'piggy':
-      bgColor = 'bg-sky-600';
-      borderColor = 'border-sky-400';
+      bgColor = 'bg-emerald-700';
+      borderColor = 'border-emerald-500';
       icon = <PiggyBank className="w-3.5 h-3.5 text-white" />;
       break;
     case 'search':
@@ -186,8 +186,8 @@ export const CircularAttributeNode: React.FC<NodeProps> = ({ data, selected }) =
       icon = <Search className="w-3.5 h-3.5 text-white" />;
       break;
     case 'cash':
-      bgColor = 'bg-blue-700';
-      borderColor = 'border-blue-500';
+      bgColor = 'bg-emerald-800';
+      borderColor = 'border-emerald-600';
       icon = <Banknote className="w-3.5 h-3.5 text-white" />;
       break;
     case 'news':
@@ -201,8 +201,8 @@ export const CircularAttributeNode: React.FC<NodeProps> = ({ data, selected }) =
       icon = <Home className="w-3.5 h-3.5 text-white" />;
       break;
     case 'card':
-      bgColor = 'bg-blue-800';
-      borderColor = 'border-blue-600';
+      bgColor = 'bg-zinc-800';
+      borderColor = 'border-zinc-600';
       icon = <CreditCard className="w-3.5 h-3.5 text-white" />;
       break;
   }

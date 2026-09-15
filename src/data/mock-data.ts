@@ -1135,6 +1135,562 @@ export const mockCasos: CasoInvestigacao[] = [
       analistaResponsavel: "Maísa Ramos"
     },
     auditLogs: []
+  },
+  {
+    id: "case-009",
+    alertaId: "ALT-PLD-2026-9409",
+    nome: "LUCAS GOMES FERREIRA (MENOR)",
+    cpf: "089.412.301-72",
+    matricula: "MAT-098210",
+    idade: 15,
+    renda: 0.00,
+    perfil: "Menor de Idade / Estudante",
+    risco: "Crítico",
+    riscoLetra: "Crítico",
+    scoreRisco: 91,
+    isPep: false,
+    alerta: "Conta de Menor e Representante Legal com Vultosa Ocultação Patrimonial",
+    regraDisparada: "REG-CAD-MENOR (Ocultação de Recursos de Pais Servidores)",
+    artigoRegulatorio: "Circular BACEN 3.978/2020 Art. 25 Inciso II",
+    dataAlerta: "20/08/2026 11:15",
+    slaHorasRestantes: 6,
+    slaLimite: "20/08/2026 18:00",
+    valorEnvolvido: 145000.00,
+    status: "Pendente",
+    tipologiaPld: "Menor e Representante Legal",
+    gatilhoAlerta: "Conta de titular com 15 anos recebendo PIX sucessivos de R$ 35k e R$ 50k dos genitores servidores públicos com bens bloqueados na Justiça",
+    volumeAtipicoPeriodo: 145000.00,
+    importadaEm: "20/08/2026 11:15",
+    analistaIniciais: "M",
+    analistaNome: "Maísa Ramos",
+    assumidaEm: "20/08/2026 11:30",
+    regiaoRisco: "Padrão",
+    regiaoNome: "Brasília / DF",
+    categoriaDossie: "MENOR",
+    capacidadeFinanceira: {
+      rendaDeclarada: 0.00,
+      patrimonioDeclarado: 5000.00,
+      volumeTransacionadoMes: 145000.00,
+      fatorIncompatibilidade: 29.0,
+      tipoComprovacao: "Sem Renda Própria / Dependente",
+      dataUltimaAtualizacao: "10/02/2026",
+      fonteRenda: "Pensão / Mesada",
+      origemRecursosDeclarada: "Aportes dos Pais",
+      capacidadeMensalEstimada: 1000.00,
+      desvioPadraoMovimentacao: "+14.500% acima do perfil infanto-juvenil"
+    },
+    resumoPldChecklist: {
+      qualificacaoKyc: false,
+      capacidadeFinanceira: false,
+      listasRestritivas: true,
+      enquadramentoPep: false,
+      vinculosSocietarios: false,
+      origemDestinoRecursos: false,
+      midiasDesabonadoras: false,
+      analiseFracionamento: true,
+      contasPassagem: false
+    },
+    kyc: {
+      nomeCompleto: "Lucas Gomes Ferreira",
+      cpfMascarado: "089.***.***-72",
+      cpfCompleto: "089.412.301-72",
+      matricula: "MAT-098210",
+      idade: 15,
+      dataNascimento: "12/04/2011",
+      profissao: "Estudante / Menor",
+      empresaVinculo: "Representante Legal: Marcos Roberto Ferreira (CPF 122.901.444-12)",
+      rendaDeclarada: 0.00,
+      patrimonioDeclarado: 5000.00,
+      perfil: "Conta Poupança / Jovem",
+      dataAssociacao: "14/03/2024 (2 anos)",
+      scoreSerasa: 320,
+      riscoBacen: "Nível 5 (Crítico)",
+      isPep: false,
+      endereco: "SHIS QL 18 Conjunto 4 Casa 12 - Lago Sul",
+      cidadeUf: "Brasília / DF",
+      contasVinculadas: [
+        { banco: "Cooperativa de Crédito (001)", agencia: "0001", conta: "77102-4", tipo: "Conta Digital Jovem" }
+      ],
+      chavesPix: ["lucas.ferreira2011@email.com"],
+      midiasDesabonadoras: [
+        "Genitor/Representante legal responde a Ação Civil de Improbidade Administrativa com indisponibilidade de bens decretada pela 3ª Vara Federal."
+      ]
+    },
+    transacoes: [
+      { id: "t9-1", data: "18/08/2026", hora: "14:20:10", tipo: "Crédito", origem: "PIX Recebido", contraparte: "Marcos Roberto Ferreira (Pai/Servidor)", contraparteCpfCnpj: "122.901.444-12", valor: 50000.00, saldoApos: 50200.00, categoria: "Transferência", metodo: "PIX", isSuspeita: true, motivoSuspeita: "Aporte expressivo de genitor com bens bloqueados judicialmente" },
+      { id: "t9-2", data: "19/08/2026", hora: "10:15:30", tipo: "Crédito", origem: "PIX Recebido", contraparte: "Marcos Roberto Ferreira (Pai/Servidor)", contraparteCpfCnpj: "122.901.444-12", valor: 45000.00, saldoApos: 95200.00, categoria: "Transferência", metodo: "PIX", isSuspeita: true, motivoSuspeita: "Novo aporte expressivo em conta de menor" },
+      { id: "t9-3", data: "19/08/2026", hora: "17:40:00", tipo: "Crédito", origem: "TED Recebida", contraparte: "Eliane Gomes Ferreira (Mãe)", contraparteCpfCnpj: "331.029.112-99", valor: 50000.00, saldoApos: 145200.00, categoria: "Transferência", metodo: "TED", isSuspeita: true, motivoSuspeita: "Terceiro aporte volumoso sem justificativa de subsistência" }
+    ],
+    grafo: {
+      nodes: [
+        { id: "n9-1", type: "MAIN", position: { x: 450, y: 190 }, data: { label: "LUCAS GOMES FERREIRA", subLabel: "Menor (15 anos) / Titular", type: "MAIN", risk: "Crítico", totalVolume: 145000.00 } },
+        { id: "n9-2", type: "FAMILY", position: { x: 90, y: 120 }, data: { label: "Marcos Roberto Ferreira", subLabel: "Genitor / Servidor Público", type: "FAMILY", risk: "Crítico", totalVolume: 95000.00 } },
+        { id: "n9-3", type: "FAMILY", position: { x: 90, y: 260 }, data: { label: "Eliane Gomes Ferreira", subLabel: "Genitora / Procuradora", type: "FAMILY", risk: "Alto", totalVolume: 50000.00 } }
+      ],
+      edges: [
+        { id: "e9-1", source: "n9-2", target: "n9-1", label: "PIX R$ 95.000", animated: true, style: { stroke: "#EF4444", strokeWidth: 3 } },
+        { id: "e9-2", source: "n9-3", target: "n9-1", label: "TED R$ 50.000", animated: true, style: { stroke: "#EF4444", strokeWidth: 3 } }
+      ]
+    },
+    parecer: {
+      deliberacao: null,
+      texto: "",
+      checklist: { extratoAnalisado: true, midiasConsultadas: true, vinculosSocietariosChecados: true, rendaVerificada: true, origemDestinoIdentificados: true, pepChecado: true },
+      analistaResponsavel: "Maísa Ramos"
+    },
+    auditLogs: []
+  },
+  {
+    id: "case-010",
+    alertaId: "ALT-PLD-2026-9410",
+    nome: "RODRIGO SANTORO MENDES",
+    cpf: "518.291.034-55",
+    matricula: "FUNC-04192",
+    idade: 34,
+    renda: 7200.00,
+    perfil: "Colaborador Cooperforte / Analista de Crédito",
+    risco: "Crítico",
+    riscoLetra: "Crítico",
+    scoreRisco: 94,
+    isPep: false,
+    alerta: "Funci Cooper - Auditoria de Fraude Interna e Créditos de Cooperados",
+    regraDisparada: "REG-RISCO-INTERNO-01 (Colaborador com Créditos de Terceiros)",
+    artigoRegulatorio: "Circular BACEN 3.978/2020 Art. 21 (Risco de Conduta Interna)",
+    dataAlerta: "20/08/2026 11:30",
+    slaHorasRestantes: 4,
+    slaLimite: "20/08/2026 17:00",
+    valorEnvolvido: 168000.00,
+    status: "Pendente",
+    tipologiaPld: "Funci Cooper",
+    gatilhoAlerta: "Créditos somando R$ 168k na conta pessoal do funcionário vindos de cooperados que tiveram contratos de empréstimos aprovados por ele",
+    volumeAtipicoPeriodo: 168000.00,
+    importadaEm: "20/08/2026 11:30",
+    analistaIniciais: "M",
+    analistaNome: "Maísa Ramos",
+    assumidaEm: "20/08/2026 11:45",
+    regiaoRisco: "Padrão",
+    regiaoNome: "Brasília / DF",
+    categoriaDossie: "FUNCIONARIO_COOPERFORTE",
+    capacidadeFinanceira: {
+      rendaDeclarada: 7200.00,
+      patrimonioDeclarado: 120000.00,
+      volumeTransacionadoMes: 168000.00,
+      fatorIncompatibilidade: 23.3,
+      tipoComprovacao: "Holerite RH Cooperforte",
+      dataUltimaAtualizacao: "01/08/2026",
+      fonteRenda: "Salário Cooperforte",
+      origemRecursosDeclarada: "Empréstimos e Negócios Pessoais",
+      capacidadeMensalEstimada: 8000.00,
+      desvioPadraoMovimentacao: "+2.330% acima da remuneração funcional"
+    },
+    resumoPldChecklist: {
+      qualificacaoKyc: true,
+      capacidadeFinanceira: false,
+      listasRestritivas: true,
+      enquadramentoPep: true,
+      vinculosSocietarios: false,
+      origemDestinoRecursos: false,
+      midiasDesabonadoras: true,
+      analiseFracionamento: true,
+      contasPassagem: false
+    },
+    kyc: {
+      nomeCompleto: "Rodrigo Santoro Mendes",
+      cpfMascarado: "518.***.***-55",
+      cpfCompleto: "518.291.034-55",
+      matricula: "FUNC-04192",
+      idade: 34,
+      dataNascimento: "19/06/1992",
+      profissao: "Analista de Operações de Crédito",
+      vinculoAssociacao: "Funcionário / Estatutário Cooperforte",
+      empresaVinculo: "COOPERFORTE Cooperativa de Crédito",
+      rendaDeclarada: 7200.00,
+      patrimonioDeclarado: 120000.00,
+      perfil: "Funcionário / Cooperado",
+      dataAssociacao: "01/02/2020 (6 anos)",
+      scoreSerasa: 690,
+      riscoBacen: "Nível 5 (Crítico)",
+      isPep: false,
+      endereco: "SQN 308 Bloco F Apto 402 - Asa Norte",
+      cidadeUf: "Brasília / DF",
+      contasVinculadas: [
+        { banco: "Cooperativa de Crédito (001)", agencia: "0001", conta: "41902-1", tipo: "Conta Salário/Corrente" }
+      ],
+      chavesPix: ["rodrigo.mendes@cooperforte.coop.br", "+5561998124401"],
+      midiasDesabonadoras: []
+    },
+    transacoes: [
+      { id: "t10-1", data: "18/08/2026", hora: "11:20:00", tipo: "Crédito", origem: "PIX Recebido", contraparte: "Cooperado Mutuário A (Aprovado por Rodrigo)", contraparteCpfCnpj: "401.992.110-33", valor: 56000.00, saldoApos: 57400.00, categoria: "Transferência", metodo: "PIX", isSuspeita: true, motivoSuspeita: "Comissão ou propina de mutuário após liberação de crédito" },
+      { id: "t10-2", data: "19/08/2026", hora: "15:10:00", tipo: "Crédito", origem: "PIX Recebido", contraparte: "Cooperado Mutuário B (Aprovado por Rodrigo)", contraparteCpfCnpj: "612.019.444-88", valor: 62000.00, saldoApos: 119400.00, categoria: "Transferência", metodo: "PIX", isSuspeita: true, motivoSuspeita: "Crédito substancial sem correspondência em folha salarial" },
+      { id: "t10-3", data: "20/08/2026", hora: "08:45:00", tipo: "Crédito", origem: "TED Recebida", contraparte: "Auto Repasses DF Comércio de Veículos", contraparteCpfCnpj: "19.401.229/0001-92", valor: 50000.00, saldoApos: 169400.00, categoria: "Transferência", metodo: "TED", isSuspeita: true, motivoSuspeita: "Origem não justificada com suspeita de conluio interno" }
+    ],
+    grafo: {
+      nodes: [
+        { id: "n10-1", type: "MAIN", position: { x: 450, y: 190 }, data: { label: "RODRIGO SANTORO MENDES", subLabel: "Analista de Crédito Cooperforte", type: "MAIN", risk: "Crítico", totalVolume: 168000.00 } },
+        { id: "n10-2", type: "COUNTERPARTY", position: { x: 90, y: 120 }, data: { label: "Mutuário A (Crédito Aprovado)", subLabel: "Cooperado Tomador de Empréstimo", type: "COUNTERPARTY", risk: "Crítico", totalVolume: 56000.00 } },
+        { id: "n10-3", type: "COUNTERPARTY", position: { x: 90, y: 260 }, data: { label: "Mutuário B (Crédito Aprovado)", subLabel: "Cooperado Tomador de Empréstimo", type: "COUNTERPARTY", risk: "Crítico", totalVolume: 62000.00 } }
+      ],
+      edges: [
+        { id: "e10-1", source: "n10-2", target: "n10-1", label: "PIX R$ 56.000", animated: true, style: { stroke: "#DC2626", strokeWidth: 3 } },
+        { id: "e10-2", source: "n10-3", target: "n10-1", label: "PIX R$ 62.000", animated: true, style: { stroke: "#DC2626", strokeWidth: 3 } }
+      ]
+    },
+    parecer: {
+      deliberacao: null,
+      texto: "",
+      checklist: { extratoAnalisado: true, midiasConsultadas: true, vinculosSocietariosChecados: true, rendaVerificada: true, origemDestinoIdentificados: false, pepChecado: true },
+      analistaResponsavel: "Maísa Ramos"
+    },
+    auditLogs: []
+  },
+  {
+    id: "case-011",
+    alertaId: "ALT-PLD-2026-9411",
+    nome: "ANA CLARA VASCONCELOS",
+    cpf: "702.819.401-22",
+    matricula: "MAT-041098",
+    idade: 52,
+    renda: 14000.00,
+    perfil: "Servidora Pública Federal / Gestora",
+    risco: "Crítico",
+    riscoLetra: "Crítico",
+    scoreRisco: 93,
+    isPep: true,
+    pepCargo: "Diretora de Departamento no Ministério dos Transportes",
+    alerta: "LIMOC - Dossiê Aprofundado com Reincidência e Extrapolação de Limite",
+    regraDisparada: "REG-LIMOC-01 (Ultrapassagem de Teto Operacional Condicionado)",
+    artigoRegulatorio: "Circular BACEN 3.978/2020 Art. 38 Inciso I e VII",
+    dataAlerta: "20/08/2026 12:00",
+    slaHorasRestantes: 5,
+    slaLimite: "20/08/2026 17:30",
+    valorEnvolvido: 380000.00,
+    status: "Pendente",
+    tipologiaPld: "LIMOC",
+    gatilhoAlerta: "Associada sob monitoramento condicionado LIMOC (teto R$ 150k) atingiu R$ 380k com reincidência de condutas reportadas ao COAF no semestre anterior",
+    volumeAtipicoPeriodo: 380000.00,
+    importadaEm: "20/08/2026 12:00",
+    analistaIniciais: "M",
+    analistaNome: "Maísa Ramos",
+    assumidaEm: "20/08/2026 12:10",
+    regiaoRisco: "Padrão",
+    regiaoNome: "Brasília / DF",
+    categoriaDossie: "LIMOC",
+    informacoesComplementares: {
+      bureauAmlReputacional: {
+        fontesConsultadas: ["OFAC", "CSNU", "CEIS", "CNEP"],
+        ocorrenciasMídiasNegativas: ["Menção em auditoria da CGU sobre contratos rodoviários"],
+        listasSancoesInternacionais: "Sem apontamentos internacionais",
+        statusReputacionalGeral: "Apontamento Moderado"
+      },
+      confirmacaoStatusPep: {
+        isPepConfirmado: true,
+        tipoEnquadramento: "Titular",
+        orgaoEntidade: "Ministério dos Transportes",
+        cargoFuncao: "Diretora de Departamento DAS 101.5",
+        enquadramentoLegal: "Art. 19 da Resolução COAF nº 40/2021"
+      },
+      indicadorLimoc: {
+        ativo: true,
+        limiteOperacionalCredito: 150000.00,
+        dataVigenciaLimite: "01/01/2026",
+        utilizacaoAtual: 380000.00,
+        observacaoLimoc: "Associada sob monitoramento intensivo após comunicação ao COAF em 11/2025"
+      }
+    },
+    capacidadeFinanceira: {
+      rendaDeclarada: 14000.00,
+      patrimonioDeclarado: 450000.00,
+      volumeTransacionadoMes: 380000.00,
+      fatorIncompatibilidade: 27.1,
+      tipoComprovacao: "Contra-cheque SIAPE",
+      dataUltimaAtualizacao: "15/05/2026",
+      fonteRenda: "Vencimentos de Servidor Público",
+      origemRecursosDeclarada: "Honorários e Consultorias",
+      capacidadeMensalEstimada: 16000.00,
+      desvioPadraoMovimentacao: "+2.710% acima da renda líquida SIAPE"
+    },
+    resumoPldChecklist: {
+      qualificacaoKyc: true,
+      capacidadeFinanceira: false,
+      listasRestritivas: true,
+      enquadramentoPep: true,
+      vinculosSocietarios: false,
+      origemDestinoRecursos: false,
+      midiasDesabonadoras: false,
+      analiseFracionamento: true,
+      contasPassagem: false
+    },
+    kyc: {
+      nomeCompleto: "Ana Clara Vasconcelos",
+      cpfMascarado: "702.***.***-22",
+      cpfCompleto: "702.819.401-22",
+      matricula: "MAT-041098",
+      idade: 52,
+      dataNascimento: "04/09/1973",
+      profissao: "Gestora Pública Federal",
+      empresaVinculo: "Ministério dos Transportes",
+      rendaDeclarada: 14000.00,
+      patrimonioDeclarado: 450000.00,
+      perfil: "Servidora Federal / PEP",
+      dataAssociacao: "12/04/2018 (8 anos)",
+      scoreSerasa: 780,
+      riscoBacen: "Nível 5 (Crítico)",
+      isPep: true,
+      pepCargo: "Diretora de Departamento",
+      endereco: "SQS 214 Bloco D - Asa Sul",
+      cidadeUf: "Brasília / DF",
+      contasVinculadas: [
+        { banco: "Banco do Brasil (001)", agencia: "3300", conta: "90123-1", tipo: "Conta Salário" },
+        { banco: "Cooperativa de Crédito (001)", agencia: "0001", conta: "60192-3", tipo: "Conta Corrente" }
+      ],
+      chavesPix: ["ana.vasconcelos@transportes.gov.br"],
+      midiasDesabonadoras: [
+        "Inquérito civil no MPF investigando direcionamento de licitação de obras rodoviárias."
+      ]
+    },
+    transacoes: [
+      { id: "t11-1", data: "18/08/2026", hora: "09:10:00", tipo: "Crédito", origem: "TED Recebida", contraparte: "Construções & Pavimentação Brasil S/A", contraparteCpfCnpj: "04.102.888/0001-19", valor: 190000.00, saldoApos: 192000.00, categoria: "Transferência", metodo: "TED", isSuspeita: true, motivoSuspeita: "Crédito milionário de fornecedor do Ministério sem justificativa comercial" },
+      { id: "t11-2", data: "19/08/2026", hora: "14:30:00", tipo: "Crédito", origem: "PIX Recebido", contraparte: "Engenharia Metropolitana Ltda", contraparteCpfCnpj: "22.991.034/0001-55", valor: 190000.00, saldoApos: 382000.00, categoria: "Transferência", metodo: "PIX", isSuspeita: true, motivoSuspeita: "Novo aporte de prestador de serviços rodoviários com estouro de LIMOC" }
+    ],
+    grafo: {
+      nodes: [
+        { id: "n11-1", type: "MAIN", position: { x: 450, y: 190 }, data: { label: "ANA CLARA VASCONCELOS", subLabel: "PEP / Gestora (LIMOC Ativo)", type: "MAIN", risk: "Crítico", totalVolume: 380000.00 } },
+        { id: "n11-2", type: "COMPANY", position: { x: 90, y: 120 }, data: { label: "Construções & Pavimentação Brasil", subLabel: "Fornecedora Governamental", type: "COMPANY", risk: "Crítico", totalVolume: 190000.00 } },
+        { id: "n11-3", type: "COMPANY", position: { x: 90, y: 260 }, data: { label: "Engenharia Metropolitana Ltda", subLabel: "Fornecedora Governamental", type: "COMPANY", risk: "Crítico", totalVolume: 190000.00 } }
+      ],
+      edges: [
+        { id: "e11-1", source: "n11-2", target: "n11-1", label: "TED R$ 190.000", animated: true, style: { stroke: "#DC2626", strokeWidth: 3.5 } },
+        { id: "e11-2", source: "n11-3", target: "n11-1", label: "PIX R$ 190.000", animated: true, style: { stroke: "#DC2626", strokeWidth: 3.5 } }
+      ]
+    },
+    parecer: {
+      deliberacao: null,
+      texto: "",
+      checklist: { extratoAnalisado: true, midiasConsultadas: true, vinculosSocietariosChecados: true, rendaVerificada: true, origemDestinoIdentificados: false, pepChecado: true },
+      analistaResponsavel: "Maísa Ramos"
+    },
+    auditLogs: []
+  },
+  {
+    id: "case-012",
+    alertaId: "ALT-PLD-2026-9412",
+    nome: "FERNANDO HENRIQUE LUZ",
+    cpf: "389.012.981-00",
+    matricula: "MAT-032194",
+    idade: 41,
+    renda: 5400.00,
+    perfil: "Servidor Público Municipal",
+    risco: "Crítico",
+    riscoLetra: "Crítico",
+    scoreRisco: 97,
+    isPep: false,
+    alerta: "Reativação Súbita de Conta Dormente com Dispositivo de Alto Risco",
+    regraDisparada: "REG-REATIVACAO-DORMENTE (Sim Swap + Fraude de Dispositivo)",
+    artigoRegulatorio: "Carta-Circular 4.001/2020 Item 1.1.4 e Circular 3.978",
+    dataAlerta: "20/08/2026 12:30",
+    slaHorasRestantes: 3,
+    slaLimite: "20/08/2026 16:00",
+    valorEnvolvido: 99000.00,
+    status: "Pendente",
+    tipologiaPld: "Reativação Súbita",
+    gatilhoAlerta: "Conta inativa há 9 meses recebeu 5 PIX de R$ 19.800 de madrugada logo após login em emulador com SIM Swap detectado",
+    volumeAtipicoPeriodo: 99000.00,
+    importadaEm: "20/08/2026 12:30",
+    analistaIniciais: "M",
+    analistaNome: "Maísa Ramos",
+    assumidaEm: "20/08/2026 12:45",
+    regiaoRisco: "Padrão",
+    regiaoNome: "Goiânia / GO",
+    device: {
+      deviceId: "DEV-EMU-ANDROID-9812",
+      modelo: "Generic Emulated Android 12",
+      sistemaOperacional: "Android 12 (Rooted)",
+      ip: "187.19.24.112 (Proxy / TOR)",
+      localizacaoGeo: "Goiânia - GO (Latência anormal)",
+      provedorIsp: "Host Gateway Cloud Services",
+      scoreRiscoFraude: 98,
+      nivelRiscoFraude: "Crítico",
+      notasAltas: ["Emulador Detectado", "Dispositivo com Root", "SIM Swap Recente (< 24h)", "Conta Dormente Reativada"],
+      vpnAtiva: true,
+      multiplosCpfsAssociados: true,
+      emuladorDetectado: true,
+      simSwapRecente: true,
+      dataUltimoAcesso: "20/08/2026 02:40:15"
+    },
+    capacidadeFinanceira: {
+      rendaDeclarada: 5400.00,
+      patrimonioDeclarado: 40000.00,
+      volumeTransacionadoMes: 99000.00,
+      fatorIncompatibilidade: 18.3,
+      tipoComprovacao: "Contracheque Desatualizado 2024",
+      dataUltimaAtualizacao: "10/01/2024",
+      fonteRenda: "Vencimentos Prefeitura de Goiânia",
+      origemRecursosDeclarada: "Desconhecida",
+      capacidadeMensalEstimada: 6000.00,
+      desvioPadraoMovimentacao: "+1.830% após 9 meses sem qualquer débito ou crédito"
+    },
+    resumoPldChecklist: {
+      qualificacaoKyc: false,
+      capacidadeFinanceira: false,
+      listasRestritivas: true,
+      enquadramentoPep: true,
+      vinculosSocietarios: false,
+      origemDestinoRecursos: false,
+      midiasDesabonadoras: true,
+      analiseFracionamento: true,
+      contasPassagem: false
+    },
+    kyc: {
+      nomeCompleto: "Fernando Henrique Luz",
+      cpfMascarado: "389.***.***-00",
+      cpfCompleto: "389.012.981-00",
+      matricula: "MAT-032194",
+      idade: 41,
+      dataNascimento: "12/10/1984",
+      profissao: "Técnico Administrativo",
+      empresaVinculo: "Prefeitura Municipal de Goiânia",
+      rendaDeclarada: 5400.00,
+      patrimonioDeclarado: 40000.00,
+      perfil: "Conta Inativa / Dormente",
+      dataAssociacao: "15/09/2019 (7 anos)",
+      scoreSerasa: 490,
+      riscoBacen: "Nível 5 (Crítico) - Suspeita de Fraude de Identidade",
+      isPep: false,
+      endereco: "Av. T-63, 1020 - Setor Bueno",
+      cidadeUf: "Goiânia / GO",
+      contasVinculadas: [
+        { banco: "Cooperativa de Crédito (001)", agencia: "0020", conta: "10982-1", tipo: "Conta Corrente" }
+      ],
+      chavesPix: ["fernando.luz84@email.com"],
+      midiasDesabonadoras: []
+    },
+    transacoes: [
+      { id: "t12-1", data: "20/08/2026", hora: "02:45:00", tipo: "Crédito", origem: "PIX Recebido", contraparte: "Lucas D. (Chave Aleatória)", contraparteCpfCnpj: "001.992.401-11", valor: 19800.00, saldoApos: 19820.00, categoria: "Transferência", metodo: "PIX", isSuspeita: true, motivoSuspeita: "Crédito de madrugada em conta reativada após meses sem movimentação" },
+      { id: "t12-2", data: "20/08/2026", hora: "02:48:10", tipo: "Crédito", origem: "PIX Recebido", contraparte: "Mariana S. (Chave Aleatória)", contraparteCpfCnpj: "402.112.981-22", valor: 19800.00, saldoApos: 39620.00, categoria: "Transferência", metodo: "PIX", isSuspeita: true, motivoSuspeita: "Repetição de mesmo valor atípico de terceiros desconhecidos" },
+      { id: "t12-3", data: "20/08/2026", hora: "02:51:30", tipo: "Crédito", origem: "PIX Recebido", contraparte: "Carlos R. (Chave Aleatória)", contraparteCpfCnpj: "710.441.229-33", valor: 19800.00, saldoApos: 59420.00, categoria: "Transferência", metodo: "PIX", isSuspeita: true, motivoSuspeita: "Pulverização de créditos sucessivos para dreno imediato" },
+      { id: "t12-4", data: "20/08/2026", hora: "02:54:15", tipo: "Crédito", origem: "PIX Recebido", contraparte: "Renata P. (Chave Aleatória)", contraparteCpfCnpj: "981.012.333-77", valor: 19800.00, saldoApos: 79220.00, categoria: "Transferência", metodo: "PIX", isSuspeita: true, motivoSuspeita: "Quarto PIX consecutivo em menos de 10 minutos" },
+      { id: "t12-5", data: "20/08/2026", hora: "02:58:00", tipo: "Crédito", origem: "PIX Recebido", contraparte: "Eduardo T. (Chave Aleatória)", contraparteCpfCnpj: "551.902.111-88", valor: 19800.00, saldoApos: 99020.00, categoria: "Transferência", metodo: "PIX", isSuspeita: true, motivoSuspeita: "Quinto PIX consecutivo de valor fracionado" }
+    ],
+    grafo: {
+      nodes: [
+        { id: "n12-1", type: "MAIN", position: { x: 450, y: 190 }, data: { label: "FERNANDO HENRIQUE LUZ", subLabel: "Conta Dormente / Reativação Súbita", type: "MAIN", risk: "Crítico", totalVolume: 99000.00 } },
+        { id: "n12-2", type: "HIGH_RISK", position: { x: 90, y: 190 }, data: { label: "5x Chaves Aleatórias PIX", subLabel: "Contas Mulas Noturnas", type: "HIGH_RISK", risk: "Crítico", totalVolume: 99000.00 } }
+      ],
+      edges: [
+        { id: "e12-1", source: "n12-2", target: "n12-1", label: "5x PIX R$ 19.800 (Madrugada)", animated: true, style: { stroke: "#DC2626", strokeWidth: 3.5 } }
+      ]
+    },
+    parecer: {
+      deliberacao: null,
+      texto: "",
+      checklist: { extratoAnalisado: true, midiasConsultadas: true, vinculosSocietariosChecados: true, rendaVerificada: true, origemDestinoIdentificados: false, pepChecado: true },
+      analistaResponsavel: "Maísa Ramos"
+    },
+    auditLogs: []
+  },
+  {
+    id: "case-013",
+    alertaId: "ALT-PLD-2026-9413",
+    nome: "GABRIEL SOUZA BRANDÃO",
+    cpf: "612.981.034-88",
+    matricula: "MAT-029410",
+    idade: 49,
+    renda: 11500.00,
+    perfil: "Engenheiro Fiscal de Obras Públicas",
+    risco: "Crítico",
+    riscoLetra: "Crítico",
+    scoreRisco: 95,
+    isPep: true,
+    pepCargo: "Fiscal de Contratos Governamentais da SEINFRA",
+    alerta: "Recebimento Contumaz de PJs - Conflito de Interesse com Fornecedores Públicos",
+    regraDisparada: "REG-CONFLITO-INTERESSE-PJ (Recebimento de Empreiteiras Contratadas)",
+    artigoRegulatorio: "Carta-Circular 4.001/2020 Item 1.1.7 e Lei 12.846/2013",
+    dataAlerta: "20/08/2026 13:00",
+    slaHorasRestantes: 5,
+    slaLimite: "20/08/2026 18:30",
+    valorEnvolvido: 290000.00,
+    status: "Pendente",
+    tipologiaPld: "Recebimento Contumaz de PJs",
+    gatilhoAlerta: "Engenheiro fiscal de obras da Secretaria de Estado recebendo pagamentos contumazes via PIX e TED de construtoras contratadas pelo órgão público",
+    volumeAtipicoPeriodo: 290000.00,
+    importadaEm: "20/08/2026 13:00",
+    analistaIniciais: "M",
+    analistaNome: "Maísa Ramos",
+    assumidaEm: "20/08/2026 13:15",
+    regiaoRisco: "Padrão",
+    regiaoNome: "Belo Horizonte / MG",
+    capacidadeFinanceira: {
+      rendaDeclarada: 11500.00,
+      patrimonioDeclarado: 420000.00,
+      volumeTransacionadoMes: 290000.00,
+      fatorIncompatibilidade: 25.2,
+      tipoComprovacao: "Contracheque Estadual",
+      dataUltimaAtualizacao: "14/02/2026",
+      fonteRenda: "Vencimentos de Fiscal de Obras",
+      origemRecursosDeclarada: "Consultorias de Engenharia",
+      capacidadeMensalEstimada: 13000.00,
+      desvioPadraoMovimentacao: "+2.520% acima do salário de fiscal"
+    },
+    resumoPldChecklist: {
+      qualificacaoKyc: true,
+      capacidadeFinanceira: false,
+      listasRestritivas: true,
+      enquadramentoPep: true,
+      vinculosSocietarios: false,
+      origemDestinoRecursos: false,
+      midiasDesabonadoras: true,
+      analiseFracionamento: true,
+      contasPassagem: false
+    },
+    kyc: {
+      nomeCompleto: "Gabriel Souza Brandão",
+      cpfMascarado: "612.***.***-88",
+      cpfCompleto: "612.981.034-88",
+      matricula: "MAT-029410",
+      idade: 49,
+      dataNascimento: "28/05/1977",
+      profissao: "Engenheiro Civil / Servidor Público",
+      empresaVinculo: "Secretaria de Estado de Infraestrutura e Obras (SEINFRA)",
+      rendaDeclarada: 11500.00,
+      patrimonioDeclarado: 420000.00,
+      perfil: "Servidor Público / Fiscal",
+      dataAssociacao: "08/11/2016 (10 anos)",
+      scoreSerasa: 790,
+      riscoBacen: "Nível 5 (Crítico)",
+      isPep: true,
+      pepCargo: "Fiscal de Contratos de Rodovias Estaduais",
+      endereco: "Rua Paraíba, 840 - Savassi",
+      cidadeUf: "Belo Horizonte / MG",
+      contasVinculadas: [
+        { banco: "Cooperativa de Crédito (001)", agencia: "0030", conta: "94821-2", tipo: "Conta Corrente" }
+      ],
+      chavesPix: ["gabriel.brandao@seinfra.mg.gov.br", "+5531988421092"],
+      midiasDesabonadoras: [
+        "Auditoria do Tribunal de Contas do Estado (TCE-MG) apontando superfaturamento em medições de obras rodoviárias sob fiscalização do servidor."
+      ]
+    },
+    transacoes: [
+      { id: "t13-1", data: "18/08/2026", hora: "10:30:00", tipo: "Crédito", origem: "TED Recebida", contraparte: "Minas Asfalto e Engenharia Ltda", contraparteCpfCnpj: "18.401.992/0001-33", valor: 140000.00, saldoApos: 142500.00, categoria: "Transferência", metodo: "TED", isSuspeita: true, motivoSuspeita: "Empreiteira contratada pela SEINFRA efetuando TED direta para fiscal do contrato" },
+      { id: "t13-2", data: "19/08/2026", hora: "16:20:00", tipo: "Crédito", origem: "PIX Recebido", contraparte: "Construvale Construtora e Obras S/A", contraparteCpfCnpj: "09.112.834/0001-77", valor: 150000.00, saldoApos: 292500.00, categoria: "Transferência", metodo: "PIX", isSuspeita: true, motivoSuspeita: "Segunda empreiteira fiscalizada transferindo montante vultoso para conta de PF do servidor" }
+    ],
+    grafo: {
+      nodes: [
+        { id: "n13-1", type: "MAIN", position: { x: 450, y: 190 }, data: { label: "GABRIEL SOUZA BRANDÃO", subLabel: "Engenheiro Fiscal SEINFRA (PEP)", type: "MAIN", risk: "Crítico", totalVolume: 290000.00 } },
+        { id: "n13-2", type: "COMPANY", position: { x: 90, y: 120 }, data: { label: "Minas Asfalto e Engenharia Ltda", subLabel: "Empreiteira Fornecedora SEINFRA", type: "COMPANY", risk: "Crítico", totalVolume: 140000.00 } },
+        { id: "n13-3", type: "COMPANY", position: { x: 90, y: 260 }, data: { label: "Construvale Construtora S/A", subLabel: "Empreiteira Fornecedora SEINFRA", type: "COMPANY", risk: "Crítico", totalVolume: 150000.00 } }
+      ],
+      edges: [
+        { id: "e13-1", source: "n13-2", target: "n13-1", label: "TED R$ 140.000", animated: true, style: { stroke: "#DC2626", strokeWidth: 3.5 } },
+        { id: "e13-2", source: "n13-3", target: "n13-1", label: "PIX R$ 150.000", animated: true, style: { stroke: "#DC2626", strokeWidth: 3.5 } }
+      ]
+    },
+    parecer: {
+      deliberacao: null,
+      texto: "",
+      checklist: { extratoAnalisado: true, midiasConsultadas: true, vinculosSocietariosChecados: true, rendaVerificada: true, origemDestinoIdentificados: false, pepChecado: true },
+      analistaResponsavel: "Maísa Ramos"
+    },
+    auditLogs: []
   }
 ];
 

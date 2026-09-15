@@ -1,4 +1,5 @@
 import { CasoInvestigacao, Transaction } from '../types';
+import { inferDossierCategoryFromCase, buildDossierValidationForCategory } from './dossierRequirementsHelper';
 
 export interface CooperforteFullDossier {
   documentoControle: string;
@@ -107,6 +108,21 @@ export interface CooperforteFullDossier {
       status: boolean;
       rotulo: string;
     }>;
+    validacaoPublicoAlvo?: {
+      categoria: string;
+      tituloCategoria: string;
+      focoExigencia: string;
+      baseRegulatoria: string;
+      statusGeral: string;
+      itens: Array<{
+        codigo: string;
+        titulo: string;
+        descricao: string;
+        status: string;
+        evidencia?: string;
+        validador?: string;
+      }>;
+    };
     recomendacoes: {
       arquivarDossie: boolean;
       comunicarCoaf: boolean;
@@ -394,6 +410,10 @@ export function buildCooperforteDossier(caso: CasoInvestigacao): CooperforteFull
     { item: 'Pesquisa Reputacional & Mídias Desabonadoras', status: caso.resumoPldChecklist?.midiasDesabonadoras ?? true, rotulo: 'Concluído' },
   ];
 
+  // Validação Dinâmica do Público Alvo do Dossiê
+  const activeCategory = caso.validacaoDossie?.categoria || caso.categoriaDossie || inferDossierCategoryFromCase(caso);
+  const activeValidation = buildDossierValidationForCategory(activeCategory, caso.validacaoDossie);
+
   const parte4 = {
     statusAvaliacao,
     deliberacaoFinal: deliberacaoFinalTexto,
@@ -405,6 +425,21 @@ export function buildCooperforteDossier(caso: CasoInvestigacao): CooperforteFull
     justificativaEconomicaLegal,
     conclusaoTecnica,
     checklistVerificacao,
+    validacaoPublicoAlvo: {
+      categoria: activeValidation.categoria,
+      tituloCategoria: activeValidation.tituloCategoria,
+      focoExigencia: activeValidation.focoExigencia,
+      baseRegulatoria: activeValidation.baseRegulatoria,
+      statusGeral: activeValidation.statusGeral,
+      itens: activeValidation.itens.map((it) => ({
+        codigo: it.codigo,
+        titulo: it.titulo,
+        descricao: it.descricaoExigencia,
+        status: it.status,
+        evidencia: it.evidenciaDoc,
+        validador: it.validador || 'Analista PLD',
+      })),
+    },
     recomendacoes: {
       arquivarDossie: delib === 'ARQUIVAR',
       comunicarCoaf: delib === 'COMUNICAR_COAF' || delib === 'BLOQUEIO_CAUTELAR',

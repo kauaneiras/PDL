@@ -144,7 +144,7 @@ export const AmlFlowEdge: React.FC<EdgeProps> = ({
                 ? 'bg-slate-950 text-white ring-2 ring-amber-400 scale-105 border-amber-400 z-30'
                 : isHighRisk
                 ? 'bg-white text-red-950 border-red-400 hover:border-red-600 hover:shadow-lg'
-                : 'bg-white text-slate-900 border-slate-300 hover:border-blue-500 hover:shadow-lg'
+                : 'bg-white text-slate-900 border-slate-300 hover:border-zinc-800 hover:shadow-lg'
             }`}
           >
             {/* Ícone de Direção: Bidirecional (⇄) ou Unidirecional (→) */}
@@ -153,7 +153,7 @@ export const AmlFlowEdge: React.FC<EdgeProps> = ({
                 isHighRisk
                   ? 'bg-red-100 text-red-700'
                   : isBidirecional
-                  ? 'bg-blue-100 text-blue-700'
+                  ? 'bg-[#FFCC01]/40 text-black'
                   : 'bg-slate-100 text-slate-700'
               }`}
               title={isBidirecional ? 'Fluxo Financeiro Bidirecional / Recíproco' : 'Fluxo Financeiro Unidirecional'}
@@ -190,7 +190,7 @@ export const AmlFlowEdge: React.FC<EdgeProps> = ({
             {valor !== undefined && (
               <span
                 className={`font-mono font-black text-[10px] tracking-tight ${
-                  isHighRisk ? 'text-red-700' : 'text-blue-900'
+                  isHighRisk ? 'text-red-700' : 'text-zinc-950'
                 }`}
               >
                 {formatCurrency(valor)}

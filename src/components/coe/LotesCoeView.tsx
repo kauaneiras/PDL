@@ -9,6 +9,7 @@ import {
   Calendar,
   X
 } from 'lucide-react';
+import { HelpTooltip } from '../common/HelpTooltip';
 
 export const LotesCoeView: React.FC = () => {
   const { showToast, setActiveCaseId, casos } = useAml();
@@ -121,11 +122,18 @@ export const LotesCoeView: React.FC = () => {
       <div className="bg-white border-b border-zinc-200 px-6 py-4">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div>
-            <h1 className="text-base font-bold text-zinc-950 tracking-tight">
-              Lotes COE - Comunicação de Operações em Espécie (SISCOAF)
-            </h1>
-            <p className="text-xs text-zinc-500">
-              Comunicação compulsória de operações em espécie iguais ou superiores a R$ 50.000,00 (Art. 49 da Circular BACEN nº 3.978/2020).
+            <div className="flex items-center gap-2">
+              <h1 className="text-base font-bold text-zinc-950 tracking-tight">
+                Lotes COE - Comunicação de Operações em Espécie (SISCOAF)
+              </h1>
+              <HelpTooltip
+                title="Comunicação de Operações em Espécie (COE)"
+                content="Comunicação compulsória ao COAF de operações de depósito, saque, aporte ou emissão de instrumentos em espécie de valor igual ou superior a R$ 50.000,00, de forma tempestiva em até 24 horas úteis."
+                baseRegulatoria="Art. 49 da Circular BACEN nº 3.978/2020 e Instrução Normativa BACEN nº 18/2020."
+              />
+            </div>
+            <p className="text-xs text-zinc-500 mt-0.5">
+              Comunicação compulsória de operações em espécie iguais ou superiores a R$ 50.000,00.
             </p>
           </div>
 
@@ -275,8 +283,14 @@ export const LotesCoeView: React.FC = () => {
                       </td>
 
                       <td className="p-3">
-                        <span className="font-medium text-zinc-900 block">{lote.tipoOperacao}</span>
-                        <span className="text-[10px] text-zinc-500">Art. 49 Circ. 3.978</span>
+                        <div className="flex items-center gap-1">
+                          <span className="font-medium text-zinc-900">{lote.tipoOperacao}</span>
+                          <HelpTooltip
+                            title="Operação em Espécie"
+                            content="Operação financeira liquidada ou movimentada em moeda física igual ou superior ao piso normativo de R$ 50.000,00."
+                            baseRegulatoria="Art. 49 da Circular BACEN nº 3.978/2020."
+                          />
+                        </div>
                       </td>
 
                       <td className="p-3">
@@ -318,19 +332,19 @@ export const LotesCoeView: React.FC = () => {
                           {!lote.enviadoSiscoaf ? (
                             <button
                               onClick={() => handleTransmitirSiscoaf(lote.id)}
-                              className="px-2.5 py-1 bg-zinc-900 hover:bg-black text-white text-xs font-medium rounded transition-colors flex items-center gap-1 cursor-pointer"
+                              className="px-2.5 py-1 bg-[#FFCC01] hover:bg-[#E5B700] text-black text-xs font-bold rounded border border-[#E5B700] transition-colors flex items-center gap-1 cursor-pointer shadow-xs"
                               title="Transmitir para o SISCOAF"
                             >
-                              <Send className="w-3 h-3" />
+                              <Send className="w-3 h-3 text-black" />
                               <span>Transmitir</span>
                             </button>
                           ) : (
                             <button
                               onClick={() => handleDownloadXml(lote)}
-                              className="px-2.5 py-1 bg-zinc-100 hover:bg-zinc-200 text-zinc-800 border border-zinc-300 text-xs font-medium rounded transition-colors flex items-center gap-1 cursor-pointer"
+                              className="px-2.5 py-1 bg-[#FFCC01] hover:bg-[#E5B700] text-black text-xs font-bold rounded border border-[#E5B700] transition-colors flex items-center gap-1 cursor-pointer shadow-xs"
                               title="Baixar Arquivo XML"
                             >
-                              <Download className="w-3 h-3" />
+                              <Download className="w-3 h-3 text-black" />
                               <span>XML</span>
                             </button>
                           )}
@@ -338,10 +352,10 @@ export const LotesCoeView: React.FC = () => {
                           {casoCorrespondente && (
                             <button
                               onClick={() => setActiveCaseId(casoCorrespondente.id)}
-                              className="px-2 py-1 text-xs text-zinc-700 hover:text-zinc-950 underline cursor-pointer"
+                              className="px-2.5 py-1 bg-[#FFCC01] hover:bg-[#E5B700] text-black text-xs font-bold rounded border border-[#E5B700] transition-colors flex items-center gap-1 cursor-pointer shadow-xs"
                               title="Abrir Ficha de Investigação"
                             >
-                              Ficha
+                              <span>Ficha</span>
                             </button>
                           )}
                         </div>
